@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "esModuleInterop": true,
+        "target": "ES2022",
+        "moduleResolution": "node",
+        "sourceMap": false,
+        "noImplicitAny": true,
+        "resolveJsonModule": true,
+        "outDir": "./cache",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": ["/**/*.ts"],
+    // "ts-node": {
+    //     "esm": true,
+    //     "files": true,
+    //     "experimentalSpecifierResolution": "node"
+    // },
+    "files": ["src/index.ts", "src/global.d.ts"]
+}
