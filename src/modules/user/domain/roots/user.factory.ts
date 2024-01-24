@@ -9,8 +9,8 @@ export default class UserFactory {
     static create(properties: UserProperties): UserFactoryResult {
         const userProperties: UserProperties = {
             ...properties,
-            id: properties.id ?? crypto.randomUUID(),
-            createdAt: properties.createdAt ?? new Date()
+            id: properties?.id ?? crypto.randomUUID(),
+            createdAt: properties?.createdAt ?? new Date()
         }
 
         const error:ErrorInterface = new Error();

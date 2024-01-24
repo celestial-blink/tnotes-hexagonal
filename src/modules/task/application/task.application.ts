@@ -35,4 +35,8 @@ export default class TaskApplication {
     getByPage(page: number, pageSize: number) {
         return this.taskRepository.getByPage(page, pageSize);
     }
+
+    getCountPending(idUser: string) {
+        return this.taskRepository.getCountPending(idUser);
+    }
 }

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import UserApplication from "../application/user.application";
 import { UserProperties } from "../domain/roots/user";
 import UserFactory from "../domain/roots/user.factory";
+import ResponseApi from "../../../core/helpers/response-api";
 
 export default class UserController {
     private readonly application: UserApplication;
@@ -28,7 +29,11 @@ export default class UserController {
 
         if (userCreateResult.isErr()) return next(userCreateResult.error);
 
-        return res.status(200).json(userCreateResult.value);
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(userCreateResult.value)
+            );
     }
 
     async update(req: Request, res: Response, next: NextFunction) {
@@ -47,14 +52,22 @@ export default class UserController {
         const userUpdatedResult = await this.application.update(user);
         if (userUpdatedResult.isErr()) return next(userUpdatedResult.error);
 
-        return res.status(200).json(userUpdatedResult.value);
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(userUpdatedResult.value)
+            );
     }
 
     async getAll(req: Request, res: Response, next: NextFunction) {
         const users = await this.application.getAll();
         if (users.isErr()) return next(users.error);
 
-        return res.status(200).json(users.value);
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(users.value)
+            );
     }
 
     async getById(req: Request, res: Response, next: NextFunction) {
@@ -62,7 +75,11 @@ export default class UserController {
         const user = await this.application.getById(id);
         if (user.isErr()) return next(user.error);
 
-        return res.status(200).json(user.value);
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(user.value)
+            );
     }
 
     async getByEmail(req: Request, res: Response, next: NextFunction) {
@@ -70,7 +87,11 @@ export default class UserController {
         const user = await this.application.getByEmail(email);
         if (user.isErr()) return next(user.error);
 
-        return res.status(200).json(user.value);
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(user.value)
+            );
     }
 
     async getByPage(req: Request, res: Response, next: NextFunction) {
@@ -78,7 +99,11 @@ export default class UserController {
         const users = await this.application.getByPage(+page, +pageSize);
         if (users.isErr()) return next(users.error);
 
-        return res.status(200).json(users.value);
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(users.value)
+            );
     }
 }
 

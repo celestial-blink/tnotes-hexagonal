@@ -35,4 +35,8 @@ export default class NoteApplication {
     async getByPage(page: number, pageSize: number) {
         return await this.noteRepository.getByPage(page, pageSize);
     }
+
+    async getLastNotes(idUser: string) {
+        return await this.noteRepository.getLastNotes(idUser);
+    }
 }

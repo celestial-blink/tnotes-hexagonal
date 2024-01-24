@@ -4,11 +4,15 @@ import { NoteRepository } from "../domain/repositories/note.repository";
 import Note from "../domain/roots/note.domain";
 import NoteModelDto, { FromDataToResponse } from "./dtos/note.model.dto";
 import DataBaseException from "../../../core/exceptions/database.exception";
+import LastNotesDto, { LastNotesFromDataToResponse } from "../application/dtos/response/last-notes.dto";
 
 export type NoteResult = Result<
     FromDataToResponse | FromDataToResponse[],
     DataBaseException
->;
+    >;
+
+export type LastNotesResult = Result<LastNotesFromDataToResponse [], DataBaseException>;
+
 export type NoteDomainResult = Result<Note, DataBaseException>;
 export type NoteGetAndTotal = Result<
     [entities: FromDataToResponse[], total: number],
@@ -160,6 +164,25 @@ export default class NoteInfrastructure implements NoteRepository {
                 note
             ) as FromDataToResponse[];
             return ok([entities, total]);
+        } catch (error) {
+            return err(new DataBaseException(error.message));
+        }
+    }
+
+    async getLastNotes(idUser: string): Promise<LastNotesResult> {
+        try {
+            const notes = await this.prisma.note.findMany({
+                select: { id: true, title: true },
+                where: { idUser },
+                take: 10,
+                orderBy: { createdAt: "desc" }
+            });
+
+            const entities = notes.map(note => LastNotesDto.fromDataToResponse({
+                id: note.id, title: note.title
+            }));
+
+            return ok(entities);
         } catch (error) {
             return err(new DataBaseException(error.message));
         }

@@ -11,7 +11,7 @@ import TaskTitleDto from "./dto/request/task-title.dto";
 import AuthenticationMiddleware from "../../../core/presentation/middleware/authentication.middleware";
 
 class TaskRouter {
-    router: Router;
+    private router: Router;
     private readonly taskController: TaskController;
 
     constructor() {
@@ -34,14 +34,7 @@ class TaskRouter {
         );
 
         this.router.get(
-            "/:id",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ body: new TaskIdDto() }),
-            this.taskController.getById.bind(this.taskController)
-        );
-
-        this.router.get(
-            "/:id",
+            "/id/:id",
             AuthenticationMiddleware.canActive,
             Validator.execute({ body: new TaskIdDto() }),
             this.taskController.getById.bind(this.taskController)
@@ -69,13 +62,22 @@ class TaskRouter {
         );
 
         this.router.get(
-            "/:page/:pageSize",
+            "/page/:page/:pageSize",
             AuthenticationMiddleware.canActive,
             Validator.execute({ params: new TaskPageDto() }),
             this.taskController.getByPage.bind(this.taskController)
         );
+
+        this.router.get(
+            "/count-pending",
+            AuthenticationMiddleware.canActive,
+            this.taskController.getCountPending.bind(this.taskController)
+        );
+    }
+
+    getRouter(): Router {
+        return this.router;
     }
 }
 
-
-export default new TaskRouter().router;
+export default new TaskRouter().getRouter();

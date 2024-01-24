@@ -1,0 +1,1 @@
+get http://127.0.0.1:1112/api/auth/session HTTP/1.1

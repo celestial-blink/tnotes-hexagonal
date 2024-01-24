@@ -9,61 +9,67 @@ import NoteTitleDto from "./dtos/request/note.title.dto";
 import NotePageDto from "./dtos/request/note.page";
 import AuthenticationMiddleware from "../../../core/presentation/middleware/authentication.middleware";
 
+const infrastructure = new NoteInfrastructure();
+const application = new NoteApplication(infrastructure);
+const noteController = new NoteController(application);
+
 class NoteRouter {
     router: Router;
     noteController: NoteController;
 
     constructor() {
         this.router = Router();
-        const infrastructure = new NoteInfrastructure();
-        const application = new NoteApplication(infrastructure);
-        this.noteController = new NoteController(application);
-
         this.addRoutes();
     }
 
-    addRoutes() {
+    private addRoutes() {
         this.router.post(
             "/insert",
             AuthenticationMiddleware.canActive,
             Validator.execute({ body: new NoteInsertDto() }),
-            this.noteController.save.bind(this.noteController)
-        )
+            noteController.save.bind(noteController)
+        );
 
         this.router.get(
-            "/:id",
+            "/id/:id",
             AuthenticationMiddleware.canActive,
             Validator.execute({ params: new NoteIdDto() }),
-            this.noteController.getById.bind(this.noteController)
-        )
+            noteController.getById.bind(noteController)
+        );
 
         this.router.get(
-            "/:title/:page/:pageSize",
+            "/title/:title/:page/:pageSize",
             AuthenticationMiddleware.canActive,
             Validator.execute({ params: new NoteTitleDto() }),
-            this.noteController.getByTitle.bind(this.noteController)
-        )
+            noteController.getByTitle.bind(noteController)
+        );
 
         this.router.get(
-            "/:page/:pageSize",
+            "/draft/:page/:pageSize",
             AuthenticationMiddleware.canActive,
             Validator.execute({ params: new NotePageDto() }),
-            this.noteController.getByDraft.bind(this.noteController)
-        )
+            noteController.getByDraft.bind(noteController)
+        );
 
         this.router.get(
-            "/:page/:pageSize",
+            "/deleted/:page/:pageSize",
             AuthenticationMiddleware.canActive,
             Validator.execute({ params: new NotePageDto() }),
-            this.noteController.getByDeletedAt.bind(this.noteController)
-        )
+            noteController.getByDeletedAt.bind(noteController)
+        );
 
         this.router.get(
-            "/:page/:pageSize",
+            "/page/:page/:pageSize",
             AuthenticationMiddleware.canActive,
             Validator.execute({ params: new NotePageDto() }),
-            this.noteController.getByPage.bind(this.noteController)
-        )
+            noteController.getByPage.bind(noteController)
+        );
+
+        this.router.get(
+            "/last-notes",
+            AuthenticationMiddleware.canActive,
+            noteController.getLastNotes.bind(noteController)
+        );
     }
 }
 

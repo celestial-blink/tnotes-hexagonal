@@ -1,4 +1,4 @@
-post http://127.0.0.1:1112/auth/login HTTP/1.1
+post http://127.0.0.1:1112/api/auth/login HTTP/1.1
 content-type: application/json
 
 {

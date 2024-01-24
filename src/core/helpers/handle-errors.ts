@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import ErrorInterface from "../error/error.interface";
 import Parameters from "./parameters";
+import ResponseApi from "./response-api";
 
 export default class HandleErrors {
     static notFound(req: Request, res: Response, next: NextFunction) {
@@ -19,7 +20,9 @@ export default class HandleErrors {
         }
 
         if (Parameters.ENVIRONMENT !== 'production') messageError['stack'] = error.stack;
-        
-        res.status(error.status || 500).json(messageError);
+
+        res
+            .status(error.status || 500)
+            .json(ResponseApi.error(messageError));
     }
 }

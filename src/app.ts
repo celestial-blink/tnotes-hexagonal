@@ -24,10 +24,10 @@ export default class App {
     }
 
     mountRoutes(): void {
-        this.app.use("/auth", authRouter);
-        this.app.use("/user", userRouter);
-        this.app.use("/note", noteRouter);
-        this.app.use("/task", TaskRouter);
+        this.app.use("/api/auth", authRouter);
+        this.app.use("/api/user", userRouter);
+        this.app.use("/api/note", noteRouter);
+        this.app.use("/api/task", TaskRouter);
     }
 
     mountHandleErrors(): void {

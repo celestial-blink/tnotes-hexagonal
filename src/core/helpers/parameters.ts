@@ -1,4 +1,4 @@
-import { addSeconds } from "date-fns";
+import { addMinutes } from "date-fns";
 
 export default class Parameters {
     static get ENVIRONMENT() {
@@ -18,11 +18,11 @@ export default class Parameters {
     }
 
     static get TOKEN_EXPIRES_TIME() {
-        return addSeconds(Date.now(), Number(process.env.TIME_EXPIRES_TIME) || 180).getTime();
+        return addMinutes(Date.now(), (Number(process.env.TIME_EXPIRES_TIME) || 3)).getTime();
     }
 
     static get REFRESH_TOKEN_EXPIRES_TIME() {
-        return addSeconds(Date.now(), Number(process.env.TIME_EXPIRES_TIME) || (2 * 24 * 60 * 60 * 1000)).getTime();
+        return Date.now() + (Number(process.env.TIME_EXPIRES_TIME) || (2 * 24 * 60 * 60 * 1000));
     }
 
     static get REFRESH_TOKEN_COOKIE_OPTIONS() {

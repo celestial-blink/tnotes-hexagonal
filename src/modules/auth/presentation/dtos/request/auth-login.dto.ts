@@ -6,8 +6,8 @@ export default class AuthLoginDto {
     validate(userProperties: Pick<UserProperties, "email" | "password">) {
         return z
             .object({
-                email: z.string().nonempty().email(),
-                password: z.string().nonempty(),
+                email: z.string().min(1).email(),
+                password: z.string().min(1),
             })
             .safeParse({
                 email: userProperties.email,

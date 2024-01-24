@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    * {
+        @apply box-border;
+    }
+
+    body {
+        @apply bg-[#E0E5F0] dark:bg-gray-900;
+    }
+
+    i,
+    svg {
+        @apply pointer-events-none;
+    }
+
+    details[open] summary {
+        @apply bg-[#e9e9e9] rounded dark:bg-[#344155];
+    }
+
+
+    details[open] summary::before {
+        @apply fixed top-0 right-0 bottom-0 left-0 z-10 block cursor-pointer content-[""] bg-transparent;
+    }
+
+    details[open] .as-menu {
+        @apply shadow-lg z-20;
+    }
+
+    button, input[type=button], input[type=submit], a {
+        @apply cursor-pointer;
+    }
+
+    ::selection {
+        @apply bg-blue-500 text-white;
+    }
+
+    #root {
+        @apply w-screen h-screen;
+    }
+}
+
+@layer components {
+    .is__wrap {
+        @apply mx-auto p-2 min-w-[360px];
+    }
+
+    .is__button__primary {
+        @apply text-white bg-cyan-900 hover:bg-cyan-800 dark:bg-cyan-500;
+    }
+
+    .is__link {
+        @apply text-cyan-600;
+    }
+
+    .is__form {
+        @apply p-2 md:p-3 text-base;
+    }
+
+    .is__form .wrap__input {
+        @apply flex flex-col;
+    }
+
+    .is__form .wrap__input p {
+        @apply text-sm text-gray-500;
+    }
+
+    .is__form .input {
+        @apply border px-2 py-2 rounded dark:bg-slate-800 dark:border-slate-600;
+    }
+
+    .is__form .label {
+        @apply font-medium;
+    }
+
+    .custom__shadow {
+        box-shadow: 0px 0px 3px #00000010;
+    }
+
+    .custom__focus__input:focus + ul,
+    .custom__focus__input + ul:active {
+        @apply block;
+    }
+}

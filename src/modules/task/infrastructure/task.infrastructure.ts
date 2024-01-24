@@ -4,6 +4,7 @@ import { TaskRepository } from "../domain/repositories/task.repository";
 import Task from "../domain/roots/task.domain";
 import TaskModelDto, { FromDataToResponse } from "./dtos/task.model.dto";
 import DataBaseException from "../../../core/exceptions/database.exception";
+import { CountPendingFromDataToResponse } from "../application/response/count-pending.dto";
 
 export type TaskResult = Result<
     FromDataToResponse | FromDataToResponse[],
@@ -15,6 +16,8 @@ export type TaskGetAndTotal = Result<
     DataBaseException
 >;
 
+
+export type getCountPendingResult = Result<CountPendingFromDataToResponse, DataBaseException>;
 
 export default class TaskInfrastructure implements TaskRepository {
     private prisma: PrismaClient;
@@ -187,7 +190,7 @@ export default class TaskInfrastructure implements TaskRepository {
         try {
 
             const total = await this.prisma.task.count({
-                where: { endDate: { not: null } } ,
+                where: { endDate: { not: null } },
             });
 
             const note = await this.prisma.task.findMany({
@@ -200,6 +203,26 @@ export default class TaskInfrastructure implements TaskRepository {
                 note
             ) as FromDataToResponse[];
             return ok([entities, total]);
+        } catch (error) {
+            return err(new DataBaseException(error.message));
+        }
+    }
+
+    async getCountPending(idUser: string): Promise<getCountPendingResult> {
+        try {
+            const countTask = await this.prisma.task.count({
+                where: { idUser, isDraft: false }
+            });
+
+            const notes = await this.prisma.task.count({
+                where: {
+                    idUser,
+                    isComplete: true,
+                    isDraft: false,
+                }
+            });
+
+            return ok({ total: countTask, totalComplete: notes });
         } catch (error) {
             return err(new DataBaseException(error.message));
         }
