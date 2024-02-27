@@ -1,24 +1,10 @@
 import NoteFactory from "./note.factory";
 
-export interface NoteRequired {
-    id: string;
-    idUser: string;
-    title: string;
-    description: string;
-    isDraft: boolean;
-    createdAt: Date;
-}
-
-export interface NoteOptional {
-    updatedAt: Date;
-    deletedAt: Date;
-}
-
-export type NoteProperties = NoteRequired & Partial<NoteOptional>;
+import type { NoteProperties } from "./types";
 
 export default class Note {
     private readonly id: string;
-    private readonly idUser: string;
+    private readonly userId: string;
     private title: string;
     private description: string;
     private isDraft: boolean;
@@ -28,7 +14,7 @@ export default class Note {
 
     constructor(properties: NoteProperties) {
         this.id = properties.id;
-        this.idUser = properties.idUser;
+        this.userId = properties.userId;
         this.title = properties.title;
         this.isDraft = properties.isDraft;
         this.createdAt = properties.createdAt;
@@ -39,7 +25,7 @@ export default class Note {
     properties(): NoteProperties {
         return {
             id: this.id,
-            idUser: this.idUser,
+            userId: this.userId,
             title: this.title,
             description: this.description,
             isDraft: this.isDraft,
@@ -53,7 +39,7 @@ export default class Note {
         this.deletedAt = new Date();
     }
 
-    update(fields: NoteProperties) {
+    update(fields: Partial<NoteProperties>) {
         const fieldsFiltered = Object.fromEntries(
             Object.entries(fields).filter(([_, v]) => v !== null)
         );

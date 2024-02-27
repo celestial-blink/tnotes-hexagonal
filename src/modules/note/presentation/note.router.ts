@@ -8,6 +8,8 @@ import NoteIdDto from "./dtos/request/note.id.dto";
 import NoteTitleDto from "./dtos/request/note.title.dto";
 import NotePageDto from "./dtos/request/note.page";
 import AuthenticationMiddleware from "../../../core/presentation/middleware/authentication.middleware";
+import NoteFilterDto from "./dtos/request/task-filter.dto";
+import NoteUpdateDto from "./dtos/request/note-update.dto";
 
 const infrastructure = new NoteInfrastructure();
 const application = new NoteApplication(infrastructure);
@@ -38,38 +40,31 @@ class NoteRouter {
         );
 
         this.router.get(
-            "/title/:title/:page/:pageSize",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ params: new NoteTitleDto() }),
-            noteController.getByTitle.bind(noteController)
-        );
-
-        this.router.get(
-            "/draft/:page/:pageSize",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ params: new NotePageDto() }),
-            noteController.getByDraft.bind(noteController)
-        );
-
-        this.router.get(
-            "/deleted/:page/:pageSize",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ params: new NotePageDto() }),
-            noteController.getByDeletedAt.bind(noteController)
-        );
-
-        this.router.get(
-            "/page/:page/:pageSize",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ params: new NotePageDto() }),
-            noteController.getByPage.bind(noteController)
-        );
-
-        this.router.get(
             "/last-notes",
             AuthenticationMiddleware.canActive,
             noteController.getLastNotes.bind(noteController)
         );
+
+        this.router.get(
+            "/filter",
+            AuthenticationMiddleware.canActive,
+            Validator.execute({ query: new NoteFilterDto() }),
+            noteController.getFilter.bind(noteController)
+        )
+
+        this.router.delete(
+            "/remove/:id",
+            AuthenticationMiddleware.canActive,
+            Validator.execute({ params: new NoteIdDto() }),
+            noteController.remove.bind(noteController)
+        )
+
+        this.router.put(
+            "/update/:id",
+            AuthenticationMiddleware.canActive,
+            Validator.execute({ params: new NoteIdDto(), body: new NoteUpdateDto() }),
+            noteController.update.bind(noteController)
+        )
     }
 }
 

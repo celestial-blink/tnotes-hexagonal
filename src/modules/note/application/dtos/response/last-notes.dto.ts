@@ -1,4 +1,4 @@
-import { NoteProperties } from "../../../domain/roots/note.domain";
+import type { NoteProperties } from "../../../domain/roots/types";
 
 export type LastNotesFromDataToResponse = {
     id: string,

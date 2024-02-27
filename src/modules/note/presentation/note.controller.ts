@@ -1,10 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 
 import NoteApplication from "../application/note.application";
-import { NoteProperties } from "../domain/roots/note.domain";
+import type { NoteProperties } from "../domain/roots/types";
 import NoteFactory from "../domain/roots/note.factory";
 import ResponseApi from "../../../core/helpers/response-api";
-import { UserProperties } from "../../user/domain/roots/user";
+import type { UserProperties } from "../../user/domain/roots/types";
+import { TypeNoteFilterDto } from "./dtos/request/task-filter.dto";
+import { FilterNoteDto } from "../application/dtos/response/filter.dto";
 
 export default class NoteController {
     private readonly application: NoteApplication;
@@ -15,13 +17,13 @@ export default class NoteController {
     async save(req: Request, res: Response, next: NextFunction) {
         const { title, description, isDraft } = req.body;
         const { user } = res.locals;
-        const { id: idUser } = user as UserProperties
+        const { id: userId } = user as UserProperties
 
         const noteProperties: NoteProperties = {
             title,
             description,
             isDraft,
-            idUser,
+            userId,
             id: null,
             createdAt: null
         }
@@ -41,17 +43,6 @@ export default class NoteController {
             );
     }
 
-    async getAll(req: Request, res: Response, next: NextFunction) {
-        const notes = await this.application.getAll();
-        if (notes.isErr()) return next(notes.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(notes.value)
-            );
-    }
-
     async getById(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params;
 
@@ -66,73 +57,11 @@ export default class NoteController {
             );
     }
 
-    async getByTitle(req: Request, res: Response, next: NextFunction) {
-        console.log("getByTitle");
-
-        const { page, pageSize, title } = req.params;
-
-        const notes = await this.application.getByTitle(title, +page, +pageSize);
-
-        if (notes.isErr()) return next(notes.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(notes.value)
-            );
-    }
-
-    async getByDraft(req: Request, res: Response, next: NextFunction) {
-        console.log("getByDraft");
-
-        const { page, pageSize } = req.params;
-
-        const notes = await this.application.getByDraft(+page, +pageSize);
-
-        if (notes.isErr()) return next(notes.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(notes.value)
-            );
-    }
-
-    async getByDeletedAt(req: Request, res: Response, next: NextFunction) {
-        const { page, pageSize } = req.params;
-
-        const notes = await this.application.getByDraft(+page, +pageSize);
-
-        if (notes.isErr()) return next(notes.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(notes.value)
-            );
-    }
-
-    async getByPage(req: Request, res: Response, next: NextFunction) {
-        console.log("getByPage");
-
-        const { page, pageSize } = req.params;
-
-        const notes = await this.application.getByPage(+page, +pageSize);
-
-        if (notes.isErr()) return next(notes.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(notes.value)
-            );
-    }
-
     async getLastNotes(req: Request, res: Response, next: NextFunction) {
         const { user } = res.locals;
-        const { id: idUser } = user as UserProperties;
+        const { id: userId } = user as UserProperties;
 
-        const notes = await this.application.getLastNotes(idUser);
+        const notes = await this.application.getLastNotes(userId);
 
         if (notes.isErr()) return next(notes.error);
 
@@ -140,6 +69,77 @@ export default class NoteController {
             .status(200)
             .json(
                 ResponseApi.success(notes.value)
+            );
+    }
+
+    async getFilter(req: Request, res: Response, next: NextFunction) {
+        const { user } = res.locals;
+        const { id: userId } = user as UserProperties;
+
+        const query = res.locals.query as TypeNoteFilterDto;
+
+        const filterParams: Partial<FilterNoteDto> = {
+            id: query.id,
+            createdAt: query.createdAt,
+            isDraft: query.isDraft,
+            title: query.title
+        }
+
+        const getFilterResult = await this.application.filter(userId, filterParams, { page: query.page, pageSize: query.pageSize });
+
+        if (getFilterResult.isErr()) return next(getFilterResult.error);
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(getFilterResult.value)
+            );
+    }
+
+    async remove(req: Request, res: Response, next: NextFunction) {
+        const { id } = req.params;
+
+        const note = await this.application.getById(id);
+
+        if (note.isErr()) return next(note.error);
+
+        const noteResult = note.value;
+        noteResult.delete();
+
+        const noteRemovedResult = await this.application.remove(noteResult);
+
+        if (noteRemovedResult.isErr()) return next(noteRemovedResult.error);
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(noteRemovedResult.value)
+            );
+    }
+
+    async update(req: Request, res: Response, next: NextFunction) {
+        const { id } = req.params;
+        const { title, description, isDraft } = req.body;
+
+        const note = await this.application.getById(id);
+
+        if (note.isErr()) return next(note.error);
+
+        const noteResult = note.value;
+        noteResult.update({
+            title,
+            description,
+            isDraft
+        });
+
+        const noteUpdatedResult = await this.application.update(noteResult);
+
+        if (noteUpdatedResult.isErr()) return next(noteUpdatedResult.error);
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(noteUpdatedResult.value)
             );
     }
 }

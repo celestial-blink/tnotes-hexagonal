@@ -1,16 +1,21 @@
 import { err, ok, Result } from "neverthrow";
-import Task, { TaskProperties } from "./task.domain";
-import ErrorInterface from "../../../../core/error/error.interface";
+import { ObjectId } from "bson";
 
+import Task from "./task.domain";
+import type { TaskProperties } from "./types";
+import ErrorInterface from "../../../../core/error/error.interface";
 
 export type TaskFactoryResult = Result<Task, Error>
 
 export default class TaskFactory {
     static create(properties: TaskProperties): TaskFactoryResult {
+        const id = new ObjectId();
         const noteProperties: TaskProperties = {
             ...properties,
-            id: properties.id ?? crypto.randomUUID(),
+            id: properties.id ?? id.toString(),
             createdAt: properties.createdAt ?? new Date(),
+            updatedAt: properties.updatedAt ?? null,
+            deletedAt: properties.deletedAt ?? null,
             isDraft: false,
             isComplete: false
         }

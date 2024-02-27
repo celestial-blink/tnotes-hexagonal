@@ -1,13 +1,11 @@
 import Note from "../roots/note.domain";
-import { NoteResult, NoteDomainResult, NoteGetAndTotal, LastNotesResult } from "../../infrastructure/note.infrastructure";
+import { NoteResult, NoteDomainResult, LastNotesResult, TaskFilterResult } from "../../infrastructure/note.infrastructure";
+import { FilterNoteDto } from "../../application/dtos/response/filter.dto";
+import { TypePagination } from "../../../../core/application/dto/TypePagination";
 
 export interface NoteRepository {
     save(note: Note): Promise<NoteResult>;
-    getAll(): Promise<NoteResult>;
     getById(id: string): Promise<NoteDomainResult>;
-    getByTitle(title: string, page: number, pageSize: number): Promise<NoteGetAndTotal>;
-    getByDraft(page: number, pageSize: number): Promise<NoteGetAndTotal>;
-    getByDeletedAt(page: number, pageSize: number): Promise<NoteGetAndTotal>;
-    getByPage(page: number, pageSize: number): Promise<NoteGetAndTotal>;
-    getLastNotes(idUser: string): Promise<LastNotesResult>;
+    getFilter(userId: string, filters: Partial<FilterNoteDto>, pagination: TypePagination): Promise<TaskFilterResult>;
+    getLastNotes(userId: string): Promise<LastNotesResult>;
 }

@@ -1,23 +1,6 @@
 import UserFactory from "./user.factory";
 
-export interface UserRequired {
-    id: string;
-    email: string;
-    password: string;
-    createdAt: Date;
-}
-
-export interface UserOptional {
-    name: string;
-    updatedAt: Date;
-    deletedAt: Date;
-}
-
-export type UserProperties = UserRequired & Partial<UserOptional>;
-
-export type UserPropertiesUpdate = Partial<
-    Omit<UserRequired, "email"> & UserOptional
->;
+import { UserProperties, UserUpdateProperties } from "./types";
 
 export default class User {
     private readonly id: string;
@@ -54,7 +37,7 @@ export default class User {
         this.deletedAt = new Date();
     }
 
-    update(fields: UserPropertiesUpdate) {
+    update(fields: UserUpdateProperties) {
         const fieldsFiltered = Object.fromEntries(
             Object.entries(fields).filter(([_, v]) => v !== null)
         );

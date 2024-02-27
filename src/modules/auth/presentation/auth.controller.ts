@@ -4,7 +4,7 @@ import ErrorInterface from "../../../core/error/error.interface";
 import Token from "../../../core/helpers/token";
 import ResponseApi from "../../../core/helpers/response-api";
 import AuthSessionDto from "./dtos/response/auth-session.dto";
-import { UserProperties } from "../../user/domain/roots/user";
+import type { UserProperties } from "../../user/domain/roots/types";
 import crypto from "crypto";
 
 export default class AuthController {
@@ -99,6 +99,29 @@ export default class AuthController {
         const newRefreshToken = Token.generateRefreshToken(payloadRefreshToken.value.id, idToken);
 
         res.status(200).json(ResponseApi.success({ accessToken: newAccessToken, refreshToken: newRefreshToken }));
+    }
+
+    async validatePassword(req: Request, res: Response, next: NextFunction) {
+        const { user } = res.locals;
+        const { id: userId } = (user as UserProperties);
+
+        const { password } = res.locals.body;
+
+        const passwordMatchResult = await this.application.validatePassword(userId, password);
+
+        if (!passwordMatchResult) {
+            const err: ErrorInterface = new Error("Password not match");
+            err.name = "Password";
+            err.status = 404;
+
+            return next(err);
+        }
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success({ password: passwordMatchResult })
+            );
     }
 }
 

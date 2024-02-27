@@ -1,64 +1,11 @@
 import { component$ } from "@builder.io/qwik";
-import { Link, routeLoader$ } from "@builder.io/qwik-city";
+import { Link } from "@builder.io/qwik-city";
 
 import { useSession } from "./layout";
 
 import TitleMobile from "~/components/TitleMobile";
-import Fetch from "~/helpers/fetch";
 import ItemLastNote, { SkeletonItemLastNote } from "~/components/ItemLastNote";
-
-type TypeLastNotes = {
-    id: string,
-    title: string
-};
-
-type TypeCountPendingTask = {
-    total: number;
-    totalComplete: number;
-}
-
-export const useLastNotes = routeLoader$(async ({ cookie }) => {
-    const lastNotes = await Fetch.execute<TypeLastNotes[]>({
-        requestInit: {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${cookie.get('accessToken')?.value}`,
-                "refreshToken": `${cookie.get('refreshToken')?.value}`
-            }
-        },
-        url: "http://127.0.0.1:1112/api/note/last-notes",
-        cookie
-    });
-
-    return lastNotes;
-});
-
-export const useCountPendingTask = routeLoader$(async ({ cookie }) => {
-    const countPending = await Fetch.execute<TypeCountPendingTask>({
-        requestInit: {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${cookie.get('accessToken')?.value}`,
-                "refreshToken": `${cookie.get('refreshToken')?.value}`
-            }
-        },
-        url: "http://127.0.0.1:1112/api/task/count-pending",
-        cookie
-    });
-
-    let percentTotal: number = 0;
-
-    if (countPending?.success && countPending.data.total > 0) {
-        percentTotal = Math.round((countPending.data.totalComplete * 100) / countPending.data.total);
-    }
-
-    return {
-        ...countPending,
-        percentTotal
-    }
-});
+import { useLastNotes, useCountPendingTask } from "./layout";
 
 export default component$(() => {
     const session = useSession();
@@ -110,10 +57,12 @@ export default component$(() => {
                     <h2 class="font-semibold text-xl">Mis ultimas notas</h2>
                     <ul class="flex flex-col gap-2 mt-2 ">
                         {
-                            lastNotes.value !== null ?
-                                (lastNotes.value.data?.length ?
-                                    lastNotes.value.data.map(item => <ItemLastNote key={item.id} title={item.title} />)
-                                    : <li>Sin resultados</li>)
+                            lastNotes.value !== null
+                                ? (
+                                    lastNotes.value.data?.length
+                                        ? lastNotes.value.data.map(item => <ItemLastNote key={item.id} title={item.title} />)
+                                        : <li>Sin resultados</li>
+                                )
                                 : <>
                                     <SkeletonItemLastNote />
                                     <SkeletonItemLastNote />
@@ -124,8 +73,12 @@ export default component$(() => {
                     </ul>
                     <div class="text-right">
                         {
-                            lastNotes.value !== null ?
-                                (lastNotes.value.data.length ? <Link href="/note" class="is__button__primary px-5 py-2 inline-block mt-4 rounded">Ver todos</Link> : null)
+                            lastNotes.value !== null
+                                ? (
+                                    lastNotes.value.data.length > 0
+                                    &&
+                                    <Link href="/note" class="is__button__primary px-5 py-2 inline-block mt-4 rounded">Ver todos</Link>
+                                )
                                 : <p class="p-6 w-[100px] text-right mt-4 inline-block rounded bg-slate-200 animate-pulse"></p>
                         }
                     </div>

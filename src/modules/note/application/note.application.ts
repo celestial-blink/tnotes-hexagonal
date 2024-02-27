@@ -1,5 +1,7 @@
 import { NoteRepository } from "../domain/repositories/note.repository";
 import Note from "../domain/roots/note.domain";
+import { TypePagination } from "../../../core/application/dto/TypePagination";
+import { FilterNoteDto } from "./dtos/response/filter.dto";
 
 export default class NoteApplication {
     private readonly noteRepository: NoteRepository;
@@ -12,31 +14,23 @@ export default class NoteApplication {
         return await this.noteRepository.save(note);
     }
 
-    async getAll() {
-        return await this.noteRepository.getAll();
-    }
-
     async getById(id: string) {
         return await this.noteRepository.getById(id);
     }
 
-    async getByTitle(title: string, page: number, pageSize: number) {
-        return await this.noteRepository.getByTitle(title, page, pageSize);
+    async getLastNotes(userId: string) {
+        return await this.noteRepository.getLastNotes(userId);
     }
 
-    async getByDraft(page: number, pageSize: number) {
-        return await this.noteRepository.getByDraft(page, pageSize);
+    async filter(userId: string, filter: Partial<FilterNoteDto>, pagination: TypePagination) {
+        return await this.noteRepository.getFilter(userId, filter, pagination);
     }
 
-    async getByDeletedAt(page: number, pageSize: number) {
-        return await this.noteRepository.getByDeletedAt(page, pageSize);
+    async remove(note: Note) {
+        return await this.noteRepository.save(note);
     }
 
-    async getByPage(page: number, pageSize: number) {
-        return await this.noteRepository.getByPage(page, pageSize);
-    }
-
-    async getLastNotes(idUser: string) {
-        return await this.noteRepository.getLastNotes(idUser);
+    async update(note: Note) {
+        return await this.noteRepository.save(note);
     }
 }

@@ -15,9 +15,9 @@ export default class TaskSaveDto implements ValidationInterface {
             .object({
                 title: z.string().max(120),
                 description: z.string().max(500),
-                isDraft: z.boolean().default(false),
-                isComplete: z.boolean().default(false),
-                endDate: z.date().optional().default(null)
+                isDraft: z.coerce.boolean().default(false),
+                isComplete: z.coerce.boolean().default(false),
+                endDate: z.coerce.date().nullable().default(null)
             })
             .safeParse(payload);
     }

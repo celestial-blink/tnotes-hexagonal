@@ -6,6 +6,7 @@ import Validator from "../../../core/presentation/middleware/validator";
 import UserCreateDto from "./dtos/request/user-create.dto";
 import AuthenticationMiddleware from "../../../core/presentation/middleware/authentication.middleware";
 import UserByPageDto from "./dtos/request/user-by-page.dto";
+import UserUpdateDto from "./dtos/request/user-update.dto";
 
 class UserRouter {
     router: Router;
@@ -26,6 +27,13 @@ class UserRouter {
             AuthenticationMiddleware.canActive,
             Validator.execute({ body: new UserCreateDto() }),
             this.userController.insert.bind(this.userController)
+        );
+
+        this.router.put(
+            "/update",
+            AuthenticationMiddleware.canActive,
+            Validator.execute({ body: new UserUpdateDto() }),
+            this.userController.update.bind(this.userController)
         );
 
         this.router.get(

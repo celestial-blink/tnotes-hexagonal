@@ -6,9 +6,9 @@ import TaskController from "./task.controller";
 import Validator from "../../../core/presentation/middleware/validator";
 import TaskSaveDto from "./dto/request/task-save.dto";
 import TaskIdDto from "./dto/request/task-id.dto";
-import TaskPageDto from "./dto/request/task-page.dto";
-import TaskTitleDto from "./dto/request/task-title.dto";
 import AuthenticationMiddleware from "../../../core/presentation/middleware/authentication.middleware";
+import TaskFilterDto from "./dto/request/task-filter.dto";
+import TaskUpdateDto from "./dto/request/task-update.dto";
 
 class TaskRouter {
     private router: Router;
@@ -41,38 +41,38 @@ class TaskRouter {
         );
 
         this.router.get(
-            "/eliminated/:page/:pageSize",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ params: new TaskPageDto() }),
-            this.taskController.getByDeletedAt.bind(this.taskController)
-        );
-
-        this.router.get(
-            "/drafts/:page/:pageSize",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ params: new TaskPageDto() }),
-            this.taskController.getByDraft.bind(this.taskController)
-        );
-
-        this.router.get(
-            "/drafts/:page/:pageSize",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ params: new TaskTitleDto() }),
-            this.taskController.getByTitle.bind(this.taskController)
-        );
-
-        this.router.get(
-            "/page/:page/:pageSize",
-            AuthenticationMiddleware.canActive,
-            Validator.execute({ params: new TaskPageDto() }),
-            this.taskController.getByPage.bind(this.taskController)
-        );
-
-        this.router.get(
             "/count-pending",
             AuthenticationMiddleware.canActive,
             this.taskController.getCountPending.bind(this.taskController)
         );
+
+        this.router.get(
+            "/filter",
+            AuthenticationMiddleware.canActive,
+            Validator.execute({ query: new TaskFilterDto() }),
+            this.taskController.getFilter.bind(this.taskController)
+        )
+
+        this.router.get(
+            "/only-filter",
+            AuthenticationMiddleware.canActive,
+            Validator.execute({ query: new TaskFilterDto() }),
+            this.taskController.getOnlyFilter.bind(this.taskController)
+        )
+
+        this.router.delete(
+            "/remove/:id",
+            AuthenticationMiddleware.canActive,
+            Validator.execute({ params: new TaskIdDto() }),
+            this.taskController.remove.bind(this.taskController)
+        )
+
+        this.router.put(
+            "/update/:id",
+            AuthenticationMiddleware.canActive,
+            Validator.execute({ params: new TaskIdDto(), body: new TaskUpdateDto() }),
+            this.taskController.update.bind(this.taskController)
+        )
     }
 
     getRouter(): Router {

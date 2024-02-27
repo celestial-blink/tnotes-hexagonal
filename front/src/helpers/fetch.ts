@@ -13,6 +13,7 @@ type FetchResult<T> = {
     data: T
 };
 
+
 export default class Fetch {
     private static url: string = "";
     private static requestInit: RequestInit = {};
@@ -28,7 +29,19 @@ export default class Fetch {
 
     private static async run<T = any>(): Promise<T> {
         try {
-            const api = await fetch(this.url, this.requestInit);
+            const api = await fetch(this.url, {
+                ...this.requestInit,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...this.cookie ? {
+                        "Authorization": `Bearer ${this.cookie.get("accessToken")?.value ?? ""}`,
+                        "refreshToken": `${this.cookie.get("refreshToken")?.value ?? ""}`,
+                    } : {}
+
+                },
+                credentials: "same-origin"
+            });
+
             const json = await api.json();
             if (api.status === 401 && !json?.success && json?.data?.name === "User unauthenticated") {
                 throw new Error("Refresh token");
@@ -44,10 +57,8 @@ export default class Fetch {
             }
 
             const json = {
-                state: false,
+                success: false,
                 data: {},
-                message: error?.message ?? "",
-                optional: {}
             }
 
             return json as T;
@@ -60,7 +71,13 @@ export default class Fetch {
                 method: "POST",
                 headers: {
                     ...this.requestInit.headers,
+                    "Content-Type": "application/json",
+                    ...this.cookie ? {
+                        "Authorization": `Bearer ${this.cookie.get("accessToken")?.value ?? ""}`,
+                        "refreshToken": `${this.cookie.get("refreshToken")?.value ?? ""}`,
+                    } : {}
                 },
+                credentials: "same-origin"
             });
             const json = await api.json();
             const prepareResponse = { ...json };
@@ -77,9 +94,12 @@ export default class Fetch {
                     ...this.requestInit,
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${json?.data?.accessToken}`,
-                        "refreshToken": `${json?.data?.refreshToken}`
-                    }
+                        ...this.cookie ? {
+                            "Authorization": `Bearer ${this.cookie.get("accessToken")?.value ?? ""}`,
+                            "refreshToken": `${this.cookie.get("refreshToken")?.value ?? ""}`,
+                        } : {}
+                    },
+                    credentials: "same-origin"
                 });
                 const jsonResult = await apiResult.json();
                 const prepareResponse = { ...jsonResult };
@@ -92,10 +112,8 @@ export default class Fetch {
             console.error(error);
 
             const json = {
-                state: false,
-                data: {},
-                message: error?.message ?? "",
-                optional: {}
+                success: false,
+                data: {}
             }
 
             return json as T;

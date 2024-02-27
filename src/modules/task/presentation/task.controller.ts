@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 
-
 import TaskApplication from "../application/task.application";
-import { TaskProperties } from "../domain/roots/task.domain";
+import type { TaskProperties } from "../domain/roots/types";
 import TaskFactory from "../domain/roots/task.factory";
 import ResponseApi from "../../../core/helpers/response-api";
-import { UserProperties } from "../../user/domain/roots/user";
+import type { UserProperties } from "../../user/domain/roots/types";
+import { TypeTaskFilterDto } from "./dto/request/task-filter.dto";
 
 export default class TaskController {
     private application;
@@ -16,13 +16,14 @@ export default class TaskController {
 
     async save(req: Request, res: Response, next: NextFunction) {
         const { title, description, isDraft, isComplete, endDate } = req.body;
+
         const { user } = res.locals;
-        const { id: idUser } = user as UserProperties;
+        const { id: userId } = user as UserProperties;
         const taskProperties: TaskProperties = {
             id: null,
             createdAt: null,
             description,
-            idUser,
+            userId,
             title,
             isDraft,
             isComplete,
@@ -42,16 +43,6 @@ export default class TaskController {
             );
     }
 
-    async getAll(req: Request, res: Response, next: NextFunction) {
-        const getAllResult = await this.application.getAll();
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(getAllResult)
-            );
-    }
-
     async getById(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params;
 
@@ -65,69 +56,120 @@ export default class TaskController {
             );
     }
 
-    async getByTitle(req: Request, res: Response, next: NextFunction) {
-        const { title, page, pageSize } = req.params;
-
-        const getByTitleResult = await this.application.getByTitle(title, +page, +pageSize);
-        if (getByTitleResult.isErr()) return next(getByTitleResult.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(getByTitleResult.value)
-            );
-    }
-
-    async getByDraft(req: Request, res: Response, next: NextFunction) {
-        const { page, pageSize } = req.params;
-
-        const getByDraftResult = await this.application.getByDraft(+page, +pageSize);
-        if (getByDraftResult.isErr()) return next(getByDraftResult.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(getByDraftResult.value)
-            );
-    }
-
-    async getByDeletedAt(req: Request, res: Response, next: NextFunction) {
-        const { page, pageSize } = req.params;
-
-        const getByDeletedAtResult = await this.application.getByDeletedAt(+page, +pageSize);
-        if (getByDeletedAtResult.isErr()) return next(getByDeletedAtResult.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(getByDeletedAtResult.value)
-            );
-    }
-
-    async getByPage(req: Request, res: Response, next: NextFunction) {
-        const { page, pageSize } = req.params;
-
-        const getByPageResult = await this.application.getByPage(+page, +pageSize);
-        if (getByPageResult.isErr()) return next(getByPageResult.error);
-
-        return res
-            .status(200)
-            .json(
-                ResponseApi.success(getByPageResult.value)
-            );
-    }
-
     async getCountPending(req: Request, res: Response, next: NextFunction) {
         const { user } = res.locals;
-        const { id: idUser } = user as UserProperties;
+        const { id: userId } = user as UserProperties;
 
-        const getCountPendingResult = await this.application.getCountPending(idUser);
+        const getCountPendingResult = await this.application.getCountPending(userId);
         if (getCountPendingResult.isErr()) return next(getCountPendingResult.error);
 
         return res
             .status(200)
             .json(
                 ResponseApi.success(getCountPendingResult.value)
+            );
+    }
+
+    async getFilter(req: Request, res: Response, next: NextFunction) {
+        const { user } = res.locals;
+        const { id: userId } = user as UserProperties;
+
+        const query = res.locals.query as TypeTaskFilterDto;
+
+        const filterParams: Partial<TypeTaskFilterDto> = {
+            id: query.id,
+            createdAt: query.createdAt,
+            endDate: query.endDate,
+            isComplete: query.isComplete,
+            isDraft: query.isDraft
+        };
+
+        const getFilterResult = await this.application.filter(userId, filterParams, { page: query.page, pageSize: query.pageSize }, query.sort);
+
+        if (getFilterResult.isErr()) return next(getFilterResult.error);
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(getFilterResult.value)
+            );
+    }
+
+    async getOnlyFilter(req: Request, res: Response, next: NextFunction) {
+        const { user } = res.locals;
+        const { id: userId } = user as UserProperties;
+
+        const query = res.locals.query as TypeTaskFilterDto;
+
+        const filterParams: Partial<TypeTaskFilterDto> = {
+            id: query.id,
+            createdAt: query.createdAt,
+            endDate: query.endDate,
+            isComplete: query.isComplete,
+            isDraft: query.isDraft
+        };
+
+        const getFilterResult = await this.application.onlyFilter(userId, filterParams, { page: query.page, pageSize: query.pageSize }, query.sort);
+
+        if (getFilterResult.isErr()) return next(getFilterResult.error);
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(getFilterResult.value)
+            );
+    }
+
+    async remove(req: Request, res: Response, next: NextFunction) {
+        const { id } = req.params;
+
+        const taskResult = await this.application.getById(id);
+        if (taskResult.isErr()) {
+            return next(taskResult.error);
+        }
+
+        const task = taskResult.value;
+        task.delete();
+
+        const taskRemoveResult = await this.application.remove(task);
+        if (taskRemoveResult.isErr()) {
+            return next(taskRemoveResult.error);
+        }
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(taskRemoveResult.value)
+            );
+    }
+
+    async update(req: Request, res: Response, next: NextFunction) {
+        const { id } = req.params;
+        const { title, description, isDraft, isComplete, endDate } = req.body;
+
+        const taskResult = await this.application.getById(id);
+        if (taskResult.isErr()) {
+            return next(taskResult.error);
+        }
+
+        const task = taskResult.value;
+        task.update({
+            title,
+            description,
+            isDraft,
+            isComplete,
+            endDate
+        })
+
+        const taskUpdatedResult = await this.application.update(task);
+        if (taskUpdatedResult.isErr()) {
+            return next(taskUpdatedResult.error);
+        }
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(taskUpdatedResult.value)
             );
     }
 }

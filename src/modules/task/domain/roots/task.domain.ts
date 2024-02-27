@@ -1,26 +1,10 @@
 import TaskFactory from "./task.factory";
 
-export interface TaskRequired {
-    id: string;
-    idUser: string;
-    title: string;
-    description: string;
-    isDraft: boolean;
-    isComplete: boolean;
-    createdAt: Date;
-}
-
-export interface TaskOptional {
-    endDate: Date;
-    updatedAt: Date;
-    deletedAt: Date;
-}
-
-export type TaskProperties = TaskRequired & Partial<TaskOptional>;
+import type { TaskProperties } from "./types";
 
 export default class Task {
     private readonly id: string;
-    private readonly idUser: string;
+    private readonly userId: string;
     private title: string;
     private description: string;
     private isDraft: boolean;
@@ -32,8 +16,9 @@ export default class Task {
 
     constructor(properties: TaskProperties) {
         this.id = properties.id;
-        this.idUser = properties.idUser;
+        this.userId = properties.userId;
         this.title = properties.title;
+        this.description = properties.description;
         this.isDraft = properties.isDraft;
         this.isComplete = properties.isComplete;
         this.endDate = properties.endDate;
@@ -45,7 +30,7 @@ export default class Task {
     properties(): TaskProperties {
         return {
             id: this.id,
-            idUser: this.idUser,
+            userId: this.userId,
             title: this.title,
             description: this.description,
             isDraft: this.isDraft,
@@ -61,7 +46,7 @@ export default class Task {
         this.deletedAt = new Date();
     }
 
-    update(fields: TaskProperties) {
+    update(fields: Partial<TaskProperties>) {
         const fieldsFiltered = Object.fromEntries(
             Object.entries(fields).filter(([_, v]) => v !== null)
         );

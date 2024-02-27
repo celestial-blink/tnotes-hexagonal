@@ -1,4 +1,5 @@
-import User, { UserProperties } from "../../domain/roots/user";
+import User from "../../domain/roots/user";
+import type { UserProperties } from "../../domain/roots/types";
 import { User as UserEntity } from "@prisma/client";
 
 export interface FromDataToResponse {

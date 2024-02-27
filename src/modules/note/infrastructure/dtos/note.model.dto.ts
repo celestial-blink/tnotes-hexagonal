@@ -1,4 +1,5 @@
-import Note, { NoteProperties } from "../../domain/roots/note.domain";
+import Note from "../../domain/roots/note.domain";
+import type { NoteProperties } from "../../domain/roots/types";
 import { Note as NoteEntity } from "@prisma/client";
 
 export interface FromDataToResponse {
@@ -16,7 +17,7 @@ export default class NoteModelDto {
 
         const noteEntity: NoteEntity = {
             id: properties.id,
-            idUser: properties.idUser,
+            userId: properties.userId,
             title: properties.title,
             description: properties.description,
             createdAt: properties.deletedAt,
@@ -57,7 +58,7 @@ export default class NoteModelDto {
     static fromDataToDomain(noteEntity: NoteEntity): Note {
         const properties: NoteProperties = {
             id: noteEntity.id,
-            idUser: noteEntity.idUser,
+            userId: noteEntity.userId,
             title: noteEntity.title,
             description: noteEntity.description,
             isDraft: noteEntity.isDraft,

@@ -1,5 +1,8 @@
 import { err, ok, Result } from "neverthrow";
-import Note, { NoteProperties } from "./note.domain";
+import { ObjectId } from "bson";
+
+import Note from "./note.domain";
+import type { NoteProperties } from "./types";
 import ErrorInterface from "../../../../core/error/error.interface";
 
 
@@ -7,9 +10,10 @@ export type NoteFactoryResult = Result<Note, Error>
 
 export default class NoteFactory {
     static create(properties: NoteProperties): NoteFactoryResult {
+        const id = new ObjectId();
         const noteProperties: NoteProperties = {
             ...properties,
-            id: properties.id ?? crypto.randomUUID(),
+            id: properties.id ?? id.toString(),
             createdAt: properties.createdAt ?? new Date(),
             isDraft: false
         }

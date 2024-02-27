@@ -28,4 +28,8 @@ export default class Parameters {
     static get REFRESH_TOKEN_COOKIE_OPTIONS() {
         return { maxAge: Date.now() + (2 * 24 * 60 * 60 * 1000), httpOnly: true, secure: true };
     }
+
+    static get FILTER_PER_PAGE() {
+        return 8;
+    }
 }

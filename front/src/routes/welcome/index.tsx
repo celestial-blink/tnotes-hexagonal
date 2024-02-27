@@ -2,6 +2,7 @@ import { component$ } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
 
 export default component$(() => {
+
     return (
         <main class="is__wrap text-base max-w-5xl">
             <div class="bg-white rounded-md p-5 flex flex-col items-center justify-between md:flex-row">

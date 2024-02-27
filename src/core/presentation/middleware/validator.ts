@@ -25,6 +25,8 @@ export default class Validator {
 
                     return next(error);
                 }
+
+                res.locals[key] = validation.data;
             });
             return next();
         };

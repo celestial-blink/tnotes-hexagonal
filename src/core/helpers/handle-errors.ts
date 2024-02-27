@@ -19,7 +19,9 @@ export default class HandleErrors {
             message: error.message || 'Internal Server Error',
         }
 
-        if (Parameters.ENVIRONMENT !== 'production') messageError['stack'] = error.stack;
+        if (Parameters.ENVIRONMENT !== 'production') {
+            messageError['stack'] = error.stack;
+        }
 
         res
             .status(error.status || 500)

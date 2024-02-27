@@ -7,6 +7,7 @@ import AuthApplication from "../application/auth.application";
 import AuthenticationMiddleware from "../../../core/presentation/middleware/authentication.middleware";
 import Validator from "../../../core/presentation/middleware/validator";
 import AuthLoginDto from "./dtos/request/auth-login.dto";
+import AuthValidatePasswordDto from "./dtos/request/validate-password.dto";
 
 class AuthRouter {
     router: Router;
@@ -43,6 +44,12 @@ class AuthRouter {
         this.router.post(
             "/refreshToken",
             this.authController.refreshToken.bind(this.authController)
+        );
+
+        this.router.post(
+            "/validate-password",
+            Validator.execute({ body: new AuthValidatePasswordDto() }),
+            this.authController.validatePassword.bind(this.authController)
         )
     }
 }

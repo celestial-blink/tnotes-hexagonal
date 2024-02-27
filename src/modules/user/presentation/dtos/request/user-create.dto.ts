@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { UserProperties } from "../../../domain/roots/user";
+import type { UserProperties } from "../../../domain/roots/types";
 
 export default class UserCreateDto {
     validate(userProperties: Partial<UserProperties>) {

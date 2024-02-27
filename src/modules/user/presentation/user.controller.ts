@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import UserApplication from "../application/user.application";
-import { UserProperties } from "../domain/roots/user";
+import type { UserProperties } from "../domain/roots/types";
 import UserFactory from "../domain/roots/user.factory";
 import ResponseApi from "../../../core/helpers/response-api";
 
@@ -37,19 +37,21 @@ export default class UserController {
     }
 
     async update(req: Request, res: Response, next: NextFunction) {
-        const { id } = req.params;
-        const { name, password } = req.body;
-        const userResult = await this.application.getById(id);
+        const { user } = res.locals;
+        const { id: userId } = user as UserProperties;
+
+        const { name, password } = res.locals.body;
+        const userResult = await this.application.getById(userId);
 
         if (userResult.isErr()) return next(userResult.error);
 
-        const user = userResult.value;
-        user.update({
+        const userMatch = userResult.value;
+        userMatch.update({
             name,
             password,
         });
 
-        const userUpdatedResult = await this.application.update(user);
+        const userUpdatedResult = await this.application.update(userMatch);
         if (userUpdatedResult.isErr()) return next(userUpdatedResult.error);
 
         return res

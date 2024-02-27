@@ -1,5 +1,8 @@
 import { err, ok, Result } from "neverthrow";
-import User, { UserProperties } from "./user";
+import { ObjectId } from "bson";
+
+import User from "./user";
+import type { UserProperties } from "./types";
 import ErrorInterface from "../../../../core/error/error.interface";
 
 
@@ -7,9 +10,10 @@ export type UserFactoryResult = Result<User, Error>
 
 export default class UserFactory {
     static create(properties: UserProperties): UserFactoryResult {
+        const id = new ObjectId();
         const userProperties: UserProperties = {
             ...properties,
-            id: properties?.id ?? crypto.randomUUID(),
+            id: properties?.id ?? id.toString(),
             createdAt: properties?.createdAt ?? new Date()
         }
 

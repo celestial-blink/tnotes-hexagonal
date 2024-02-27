@@ -34,4 +34,17 @@ export default class AuthApplication {
     async logout(user: User): Promise<UserResult> {
         return await this.application.create(user);
     }
+
+    async validatePassword(userId: string, password: string): Promise<boolean> {
+        const userFound = await this.application.getById(userId);
+
+        if (userFound.isErr()) return null;
+
+        const userMatch = await Crypt.compare(
+            password,
+            userFound.value.properties().password
+        );
+
+        return userMatch
+    }
 }

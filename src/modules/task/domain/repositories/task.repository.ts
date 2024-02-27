@@ -1,15 +1,12 @@
 import Task from "../roots/task.domain";
-import { TaskResult, TaskDomainResult, TaskGetAndTotal, getCountPendingResult } from "../../infrastructure/task.infrastructure";
+import { TaskResult, TaskDomainResult, getCountPendingResult, TaskFilterResult, TaskOnlyFilterResult } from "../../infrastructure/task.infrastructure";
+import { FilterDtoFromDataToResponse } from "../../application/response/filter.dto";
+import { TypePagination } from "../../../../core/application/dto/TypePagination";
 
 export interface TaskRepository {
     save(note: Task): Promise<TaskResult>;
-    getAll(): Promise<TaskResult>;
     getById(id: string): Promise<TaskDomainResult>;
-    getByTitle(title: string, page: number, pageSize: number): Promise<TaskGetAndTotal>;
-    getByDraft(page: number, pageSize: number): Promise<TaskGetAndTotal>;
-    getByDeletedAt(page: number, pageSize: number): Promise<TaskGetAndTotal>;
-    getByComplete(page: number, pageSize: number): Promise<TaskGetAndTotal>;
-    getByEndDate(page: number, pageSize: number): Promise<TaskGetAndTotal>;
-    getByPage(page: number, pageSize: number): Promise<TaskGetAndTotal>;
-    getCountPending(idUser: string): Promise<getCountPendingResult>;
+    getCountPending(userId: string): Promise<getCountPendingResult>;
+    getFilter(userId: string, filters: Partial<FilterDtoFromDataToResponse>, pagination: TypePagination, sort: "asc" | "desc"): Promise<TaskFilterResult>
+    getOnlyFilter(userId: string, filters: Partial<FilterDtoFromDataToResponse>, pagination: TypePagination, sort: "asc" | "desc"): Promise<TaskOnlyFilterResult>
 }

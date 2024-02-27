@@ -1,4 +1,5 @@
-import Task, { TaskProperties } from "../../domain/roots/task.domain";
+import Task from "../../domain/roots/task.domain";
+import type { TaskProperties } from "../../domain/roots/types";
 import { Task as TaskEntity } from "@prisma/client";
 
 export interface FromDataToResponse {
@@ -13,18 +14,18 @@ export interface FromDataToResponse {
 }
 
 export default class TaskModelDto {
-    static fromDomainToData(note: Task): TaskEntity {
+    static fromDomainToData(note: Task): TaskProperties {
         const properties = note.properties();
 
         const taskEntity: TaskEntity = {
             id: properties.id,
-            idUser: properties.idUser,
+            userId: properties.userId,
             title: properties.title,
             description: properties.description,
             isDraft: properties.isDraft,
             isComplete: properties.isComplete,
             endDate: properties.endDate,
-            createdAt: properties.deletedAt,
+            createdAt: properties.createdAt,
             updatedAt: properties.updatedAt,
             deletedAt: properties.deletedAt
         };
@@ -65,7 +66,7 @@ export default class TaskModelDto {
     static fromDataToDomain(taskEntity: TaskEntity): Task {
         const properties: TaskProperties = {
             id: taskEntity.id,
-            idUser: taskEntity.idUser,
+            userId: taskEntity.userId,
             title: taskEntity.title,
             description: taskEntity.description,
             isDraft: taskEntity.isDraft,

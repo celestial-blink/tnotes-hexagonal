@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { UserProperties } from "../../../../user/domain/roots/user";
+import type { UserProperties } from "../../../../user/domain/roots/types";
 
 export default class AuthLoginDto {
     validate(userProperties: Pick<UserProperties, "email" | "password">) {

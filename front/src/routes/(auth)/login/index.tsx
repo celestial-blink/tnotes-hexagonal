@@ -2,21 +2,11 @@ import { component$ } from "@builder.io/qwik";
 import { Link, routeAction$, Form, zod$, z, RequestHandler } from "@builder.io/qwik-city";
 import { format, addDays } from "date-fns";
 
+import AuthApi from "~/api/AuthApi";
 import Fetch from "~/helpers/fetch";
 
-export const onGet: RequestHandler = async ({ cookie, redirect }) => {
-    const session = await Fetch.execute({
-        requestInit: {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${cookie.get('accessToken')?.value}`,
-                "refreshToken": `${cookie.get('refreshToken')?.value}`
-            }
-        },
-        url: "http://127.0.0.1:1112/api/auth/session",
-        cookie
-    });
+export const onGet: RequestHandler = async ({ cookie, redirect, signal }) => {
+    const session = await AuthApi.session(signal, cookie);
 
     if (session.success) throw redirect(302, "/");
 }
@@ -27,7 +17,8 @@ export const useLoginUser = routeAction$(
             requestInit: {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: "same-origin"
             },
             url: "http://127.0.0.1:1112/api/auth/login",
             cookie: null
@@ -58,7 +49,7 @@ export default component$(() => {
         <>
             <div class="w-full flex flex-col items-center">
                 <div class="h-16 w-16 rounded-full bg-cyan-900"></div>
-                <h1 class="text-cyan-900 text-4xl">Iniciar session</h1>
+                <h1 class="text-cyan-900 text-4xl">Iniciar sesión</h1>
             </div>
             <Form class="is__form w-full gap-7 flex flex-col text-lg" action={action}>
                 <fieldset class="w-full flex gap-2 flex-col" disabled={action.isRunning}>

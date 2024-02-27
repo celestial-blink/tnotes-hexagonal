@@ -1,4 +1,4 @@
-import User, { UserProperties } from "../../../../user/domain/roots/user";
+import type { UserProperties } from "../../../../user/domain/roots/types";
 
 type ResultFromDataToResponse = {
     id: string,
