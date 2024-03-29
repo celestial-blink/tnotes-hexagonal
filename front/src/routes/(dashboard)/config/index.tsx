@@ -4,7 +4,7 @@ import TitleMobile from "~/components/TitleMobile";
 
 import { useSession } from "../layout";
 
-import { useUpdateName, useUpdatePassword, useValidatePassword } from "./actions";
+import { useUpdateName, useUpdatePassword, useValidatePassword } from "./layout";
 
 export default component$(() => {
     const session = useSession();
@@ -81,7 +81,7 @@ export default component$(() => {
                                             ? updateName.value.fieldErrors.name
                                             : (
                                                 updateName.value?.success === false
-                                                && (updateName.value.data?.message ?? "No se guardaron los cambios")
+                                                && (updateName.value.data.name ?? "No se guardaron los cambios")
                                             )
                                     }
                                 </p>

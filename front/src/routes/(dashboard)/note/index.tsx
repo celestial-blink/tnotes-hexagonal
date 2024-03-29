@@ -11,65 +11,95 @@ import useNote from "~/hooks/useNote";
 import FormNote from "~/components/FormNote";
 import PreviewNote from "~/components/PreviewNote";
 
+// import { useLoaderNote } from "./layout";
+
 import { deleteNote, updateNote, getCoincidences } from "./servers";
+import { NoteFilterEntitiesResult } from "~/api/NoteApi/types";
+import { routeLoader$ } from "@builder.io/qwik-city";
+import NoteApi from "~/api/NoteApi";
+
+export const useLoaderNote = routeLoader$(async ({ query, signal, cookie }) => {
+    const title = query.get("title");
+
+    const loaderNote = await NoteApi.filter(
+        title ? { title } : {},
+        signal,
+        cookie
+    );
+
+    return loaderNote;
+});
 
 export default component$(() => {
-    const { noteFilters, notes, onFetchData } = useNote();
-    const modalContext = useContext(ModalContext);
+    const loaderNote = useLoaderNote();
 
-    const onSuccessForm = $(() => {
-        onFetchData();
-        modalContext.component = null;
-        modalContext.show = false;
+    const { noteFilters, notes, onFetchData$ } = useNote({
+        entities: loaderNote.value.data.entities,
+        total: loaderNote.value.data.total
     });
 
-    const handleAdd = $((id?: string, action?: string) => {
-        modalContext.component = <FormNote id={id} action={action} onSuccessForm={onSuccessForm} />
+    const modalContext = useContext(ModalContext);
+
+    const onSuccessForm$ = $(() => {
+        modalContext.component = null;
+        modalContext.show = false;
+        onFetchData$();
+    });
+
+    const handleAdd$ = $((id?: string, action?: string) => {
+        modalContext.component = <FormNote id={id} action={action} onSuccessForm$={onSuccessForm$} />
         modalContext.show = true;
     });
 
     const handleDelete$ = $(async (id: string) => {
         const deletedTask = await deleteNote(id);
-        if (deletedTask.success) onFetchData();
+        if (deletedTask.success) onFetchData$();
     })
 
-    const handleSetIsDraft$ = $(async (id: string) => {
-        const updatedTask = await updateNote(id, { isDraft: true });
-        if (updatedTask.success) onFetchData();
+    const handleSetIsDraft$ = $(async (id: string, isDraft: boolean) => {
+        const updatedTask = await updateNote(id, { isDraft });
+        if (updatedTask.success) {
+            onFetchData$();
+        }
     })
 
-    const handleView = $((id: string) => {
+    const handleView$ = $((id: string) => {
         modalContext.component = <PreviewNote id={id} />;
         modalContext.show = true;
     });
 
-    const onChangeSearch$ = $(async (title: string) => {
+    const onChangeSearch$ = $(async (title: string): Promise<NoteFilterEntitiesResult[] | null> => {
         const fetchData = await getCoincidences(title);
 
         return fetchData.data.entities;
     });
 
-    const onSubmitSearch$ = (async (title: string) => {
+    const onSubmitSearch$ = $(async (title: string) => {
         noteFilters.title = title;
+        onFetchData$();
     });
 
-    const handlePagination = (page: number = 0) => {
+    const handlePagination$ = $((page: number = 0) => {
         noteFilters.page = page;
-    };
+        onFetchData$();
+    });
 
-    const handleClickFilter = $((event: PointerEvent, _: HTMLDetailsElement) => {
+    const handleClickFilter$ = $((event: PointerEvent, _: HTMLDetailsElement) => {
         const { dataset, tagName, value } = event.target as HTMLButtonElement;
+
         if (tagName === "BUTTON" && dataset?.evref === "handleClickFilter" && dataset.action && Object.hasOwn(noteFilters, dataset?.action)) {
             if (dataset.action === "sort") noteFilters.sort = value === "asc" ? "asc" : "desc";
             if (dataset.action === "includeDraft") noteFilters.includeDraft = !noteFilters.includeDraft;
             if (dataset.action === "onlyDraft") noteFilters.includeDraft = !noteFilters.onlyDraft;
+
+            onFetchData$();
         }
     });
 
     const handleClickMenuItem$ = $((action: string, id?: string, payload?: string) => {
-        if (action === "update") handleAdd(id, "update");
+        if (action === "update") handleAdd$(id, "update");
         if (action === "delete" && id) handleDelete$(id);
-        if (action === "asDraft" && id) handleSetIsDraft$(id);
+        if (action === "asDraft" && id) handleSetIsDraft$(id, payload === "true");
     })
 
     return (
@@ -77,23 +107,23 @@ export default component$(() => {
             <TitleMobile />
             <section class="rounded bg-white flex items-center gap-2 p-2 z-[2] md:gap-2 dark:bg-slate-700 dark:text-white">
                 <Search onChange$={onChangeSearch$} onCustomSubmit$={onSubmitSearch$} defaultValue={""} />
-                <button class="is__button__primary py-2 px-4 rounded h-max" onClick$={() => { handleAdd() }}>Nuevo</button>
+                <button class="is__button__primary py-2 px-4 rounded h-max" onClick$={() => { handleAdd$() }}>Nuevo</button>
             </section>
             <section class="rounded bg-white flex justify-end gap-5 p-2 relative dark:bg-slate-700 dark:text-white" >
-                <details class="details" onClick$={handleClickFilter}>
+                <details class="details" onClick$={handleClickFilter$}>
                     <summary class="list-none text-cyan-900 cursor-pointer p-1 rounded dark:text-white dark:border-slate-400">
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-filter inline-block align-bottom" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" /></svg>
                         Filtros
                     </summary>
                     <menu class="as-menu absolute bg-white p-2 right-[15px] rounded w-max flex gap-2 flex-col text-sm dark:bg-slate-800">
                         <li>
-                            <button class={`w-full text-left p-[2px] rounded ${noteFilters.sort === "asc" ? "bg-slate-200 dark:bg-slate-500" : ""}`} data-action="sorttype" data-evref="handleClickFilter" value={1}>
+                            <button class={`w-full text-left p-[2px] rounded ${noteFilters.sort === "asc" ? "bg-slate-200 dark:bg-slate-500" : ""}`} data-action="sorttype" data-evref="handleClickFilter" value={"asc"}>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-up inline-block align-bottom" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M18 11l-6 -6" /><path d="M6 11l6 -6" /></svg>
                                 Ordenar ascendente
                             </button>
                         </li>
                         <li>
-                            <button class={`w-full text-left p-[2px] rounded ${noteFilters.sort === "desc" ? "bg-slate-200 dark:bg-slate-500" : ""}`} data-action="sorttype" data-evref="handleClickFilter" value={-1}>
+                            <button class={`w-full text-left p-[2px] rounded ${noteFilters.sort === "desc" ? "bg-slate-200 dark:bg-slate-500" : ""}`} data-action="sorttype" data-evref="handleClickFilter" value={"desc"}>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-down inline-block align-bottom" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M18 13l-6 6" /><path d="M6 13l6 6" /></svg>
                                 Ordenar descendente
                             </button>
@@ -121,13 +151,13 @@ export default component$(() => {
                 </details>
             </section>
             <section class="rounded bg-white p-2 dark:bg-slate-700 dark:text-white">
-                <Pagination title="notas" total={notes.total?.totalPages ?? 0} current={notes.total?.currentPage ?? 0} handlePagination={handlePagination} />
+                <Pagination title="notas" total={notes.total ?? 0} current={noteFilters.page ?? 0} handlePagination={handlePagination$} />
                 <div class="flex  flex-col gap-2 mt-2">
                     {
                         notes !== null
                             ? (
                                 notes.data?.length
-                                    ? notes.data.map(item => <NoteItem key={item.id} id={item.id} title={item.title} createdAt={format(new Date(item.createdAt), "dd MMMM yyyy")} onClickMenu$={handleClickMenuItem$} isDraft={item.isDraft} onClickItem$={handleView} />)
+                                    ? notes.data.map(item => <NoteItem key={`${item.id}-${item.title}-${item.isDraft}`} id={item.id} title={item.title} createdAt={format(new Date(item.createdAt), "dd MMMM yyyy")} onClickMenu$={handleClickMenuItem$} isDraft={item.isDraft} onClickItem$={handleView$} />)
                                     : <p>Sin resultados</p>
                             )
                             : <>

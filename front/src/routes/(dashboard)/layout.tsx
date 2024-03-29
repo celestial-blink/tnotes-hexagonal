@@ -1,12 +1,10 @@
 import { Slot, component$ } from "@builder.io/qwik";
-import { useLocation, Link, routeLoader$, routeAction$, zod$, z } from "@builder.io/qwik-city";
+import { useLocation, Link, routeLoader$ } from "@builder.io/qwik-city";
 
 import { useModalContext } from "~/context/ModalContext";
 import Modal from "~/components/Modal";
 
 import AuthApi from "~/api/AuthApi";
-import TaskApi from "~/api/TaskApi";
-import NoteApi from "~/api/NoteApi";
 import useTheme$ from "~/hooks/useTheme";
 
 export const useSession = routeLoader$(async ({ cookie, redirect, signal }) => {
@@ -14,87 +12,12 @@ export const useSession = routeLoader$(async ({ cookie, redirect, signal }) => {
 
     if (!session.success) throw redirect(302, "/login/");
 
+    const take = await fetch("https://hayqbhgr.slider.kz/vk_auth.php?q=feast the night");
+    const json = await take.json();
+    console.log(json);
+
     return session;
 });
-
-export const useLastNotes = routeLoader$(async ({ cookie, signal }) => {
-    const lastNotes = await NoteApi.lastNotes(signal, cookie);
-
-    return lastNotes;
-});
-
-export const useCountPendingTask = routeLoader$(async ({ cookie, signal }) => {
-    const countPending = await TaskApi.countPending(signal, cookie);
-
-    let percentTotal: number = 0;
-
-    if (countPending?.success && countPending.data.total > 0) {
-        percentTotal = Math.round((countPending.data.totalComplete * 100) / countPending.data.total);
-    }
-
-    return {
-        ...countPending,
-        percentTotal
-    }
-});
-
-
-export const useLoaderTask = routeLoader$(async ({ query, signal, cookie }) => {
-    const loaderTask = await TaskApi.filter(
-        query.get("is_pending") ? { isComplete: false, isDraft: false } : {},
-        signal,
-        cookie
-    );
-
-    return loaderTask;
-});
-
-export const useLoaderNote = routeLoader$(async ({ query, signal, cookie }) => {
-    const title = query.get("title");
-    const loaderNote = await NoteApi.filter(
-        title ? { title } : {},
-        signal,
-        cookie
-    );
-
-    return loaderNote;
-});
-
-
-const validationSubmitCreateTask = zod$({
-    title: z.string(),
-    description: z.string(),
-    isDraft: z.boolean().optional().refine(value => !value).default(false),
-    endDate: z.coerce.date().nullable(),
-    isComplete: z.boolean().optional().refine(value => !value).default(false),
-});
-
-const validationSubmitUpdateTask = zod$({
-    id: z.string(),
-    title: z.string(),
-    description: z.string(),
-    isDraft: z.boolean().optional().refine(value => !value).default(false),
-    endDate: z.coerce.date().nullable(),
-    isComplete: z.boolean().optional().refine(value => !value).default(false)
-});
-
-export const useCreateTask = routeAction$(async (task, { cookie, signal }) => {
-    const createdTask = await TaskApi.create(task, signal, cookie);
-    console.log("🚀 ~ useCreateTask ~ createdTask:", createdTask)
-
-    return createdTask;
-}, validationSubmitCreateTask);
-
-
-export const useUpdateTask = routeAction$(async (task, { cookie, signal }) => {
-    const { id, ...rest } = task;
-    const updatedTask = await TaskApi.update(id, rest, signal, cookie);
-
-    return updatedTask;
-}, validationSubmitUpdateTask)
-
-
-
 
 
 export default component$(() => {

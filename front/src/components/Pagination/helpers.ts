@@ -18,5 +18,6 @@ export const generatePages = (total: number, current: number): Array<number> => 
     const previousValues = previous(current - 1);
     const nextValues = next(current + 1, total);
     const prepareResult = [...previousValues, current, ...nextValues];
+
     return prepareResult;
 }

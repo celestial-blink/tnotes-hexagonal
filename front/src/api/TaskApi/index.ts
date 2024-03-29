@@ -7,7 +7,9 @@ import { TaskFilters, TaskCreateParams, TaskFilterResult, TaskCountPendingResult
 
 export default class TaskApi {
     static async create(task: TaskCreateParams, signal: AbortSignal | null, cookie: Cookie) {
-        const createdResult = await Fetch.execute<TaskProperties>({
+        const myFetch = new Fetch();
+
+        const createdResult = await myFetch.execute<TaskProperties>({
             url: `${config.PATH_BASE_API}task/insert`,
             cookie,
             requestInit: {
@@ -21,7 +23,9 @@ export default class TaskApi {
     }
 
     static async update(id: string, task: Partial<TaskUpdateParams>, signal: AbortSignal | null, cookie: Cookie) {
-        const updatedResult = await Fetch.execute<TaskProperties>({
+        const myFetch = new Fetch();
+
+        const updatedResult = await myFetch.execute<TaskProperties>({
             url: `${config.PATH_BASE_API}task/update/${id}`,
             cookie,
             requestInit: {
@@ -35,7 +39,9 @@ export default class TaskApi {
     }
 
     static async remove(id: string, signal: AbortSignal | null, cookie: Cookie) {
-        const updatedResult = await Fetch.execute<TaskProperties>({
+        const myFetch = new Fetch();
+
+        const updatedResult = await myFetch.execute<TaskProperties>({
             url: `${config.PATH_BASE_API}task/remove/${id}`,
             cookie,
             requestInit: {
@@ -54,7 +60,9 @@ export default class TaskApi {
             queryString.append(key, value.toString());
         });
 
-        const filterResult = await Fetch.execute<TaskFilterResult>({
+        const myFetch = new Fetch();
+
+        const filterResult = await myFetch.execute<TaskFilterResult>({
             url: `${config.PATH_BASE_API}task/filter?${queryString.toString()}`,
             cookie,
             requestInit: {
@@ -70,10 +78,14 @@ export default class TaskApi {
         const queryString = new URLSearchParams();
 
         Object.entries(filters).forEach(([key, value]) => {
-            queryString.append(key, value.toString());
+            if (value && value?.toString().trim()) {
+                queryString.append(key, value.toString());
+            }
         });
 
-        const filterResult = await Fetch.execute<TaskOnlyFilterResult>({
+        const myFetch = new Fetch();
+
+        const filterResult = await myFetch.execute<TaskOnlyFilterResult>({
             url: `${config.PATH_BASE_API}task/only-filter?${queryString.toString()}`,
             cookie,
             requestInit: {
@@ -86,7 +98,9 @@ export default class TaskApi {
     }
 
     static async countPending(signal: AbortSignal | null, cookie: Cookie) {
-        const countedPending = await Fetch.execute<TaskCountPendingResult>({
+        const myFetch = new Fetch();
+
+        const countedPending = await myFetch.execute<TaskCountPendingResult>({
             url: `${config.PATH_BASE_API}task/count-pending`,
             cookie,
             requestInit: {
@@ -99,7 +113,9 @@ export default class TaskApi {
     }
 
     static async getById(id: string, signal: AbortSignal | null, cookie: Cookie) {
-        const findTask = await Fetch.execute<TaskProperties>({
+        const myFetch = new Fetch();
+
+        const findTask = await myFetch.execute<TaskProperties>({
             url: `${config.PATH_BASE_API}task/id/${id}`,
             cookie,
             requestInit: {

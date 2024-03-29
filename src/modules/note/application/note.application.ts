@@ -22,8 +22,12 @@ export default class NoteApplication {
         return await this.noteRepository.getLastNotes(userId);
     }
 
-    async filter(userId: string, filter: Partial<FilterNoteDto>, pagination: TypePagination) {
-        return await this.noteRepository.getFilter(userId, filter, pagination);
+    async filter(userId: string, filter: Partial<FilterNoteDto>, pagination: TypePagination, sort: "asc" | "desc") {
+        return await this.noteRepository.getFilter(userId, filter, pagination, sort);
+    }
+
+    async onlyFilter(userId: string, filter: Partial<FilterNoteDto>, pagination: TypePagination, sort: "asc" | "desc") {
+        return await this.noteRepository.getOnlyFilter(userId, filter, pagination, sort);
     }
 
     async remove(note: Note) {

@@ -36,7 +36,7 @@ class TaskRouter {
         this.router.get(
             "/id/:id",
             AuthenticationMiddleware.canActive,
-            Validator.execute({ body: new TaskIdDto() }),
+            Validator.execute({ params: new TaskIdDto() }),
             this.taskController.getById.bind(this.taskController)
         );
 

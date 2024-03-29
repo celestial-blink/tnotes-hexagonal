@@ -17,7 +17,7 @@ export type TaskResult = Result<
 export type TaskDomainResult = Result<Task, DataBaseException>;
 
 export type TaskFilterResult = Result<
-    [entities: FilterDtoFromDataToResponse[], total: number],
+    { entities: FilterDtoFromDataToResponse[], total: number },
     DataBaseException
 >;
 
@@ -45,8 +45,9 @@ export default class TaskInfrastructure implements TaskRepository {
                     ...rest,
                     user: {
                         connect: {
-                        id: userId
-                     } }
+                            id: userId
+                        }
+                    }
                 },
                 update: { ...rest },
                 include: { user: true }
@@ -93,25 +94,26 @@ export default class TaskInfrastructure implements TaskRepository {
     async getFilter(userId: string, filters: Partial<FilterDtoFromDataToResponse>, pagination: TypePagination, sort: "asc" | "desc"): Promise<TaskFilterResult> {
         try {
             const countTask = await this.prisma.task.count({
-                where: { userId, isDraft: false }
+                where: { userId, isDraft: false, deletedAt: null }
             });
 
-            const notes = await this.prisma.task.findMany({
+            const tasks = await this.prisma.task.findMany({
                 select: { id: true, title: true, createdAt: true, isDraft: true, endDate: true, isComplete: true },
                 orderBy: { createdAt: sort },
                 where: {
                     userId,
+                    deletedAt: null,
                     ...filters
                 },
-                skip: (pagination.page - 1) * Parameters.FILTER_PER_PAGE,
-                take: Parameters.FILTER_PER_PAGE
+                skip: (pagination.page - 1) * pagination.pageSize,
+                take: pagination.pageSize
             });
 
-            const result = notes.map(note => {
-                return FilterDto.fromDataToResponse(note);
+            const result = tasks.map(task => {
+                return FilterDto.fromDataToResponse(task);
             });
 
-            return ok([result, countTask]);
+            return ok({ entities: result, total: countTask });
         } catch (error) {
             return err(new DataBaseException(error.message));
         }
@@ -124,6 +126,7 @@ export default class TaskInfrastructure implements TaskRepository {
                 orderBy: { createdAt: sort },
                 where: {
                     userId,
+                    deletedAt: null,
                     ...filters
                 },
                 skip: (pagination.page - 1) * Parameters.FILTER_PER_PAGE,

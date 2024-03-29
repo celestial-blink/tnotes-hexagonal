@@ -12,7 +12,7 @@ export default class NoteInsertDto {
             .object({
                 title: z.string().max(120),
                 description: z.string().max(500),
-                isDraft: z.boolean().default(false)
+                isDraft: z.coerce.boolean().default(false)
             })
             .safeParse(payload);
     }

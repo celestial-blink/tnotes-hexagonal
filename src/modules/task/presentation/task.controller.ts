@@ -78,10 +78,11 @@ export default class TaskController {
 
         const filterParams: Partial<TypeTaskFilterDto> = {
             id: query.id,
+            title: query.title,
             createdAt: query.createdAt,
             endDate: query.endDate,
             isComplete: query.isComplete,
-            isDraft: query.isDraft
+            isDraft: query.isDraft,
         };
 
         const getFilterResult = await this.application.filter(userId, filterParams, { page: query.page, pageSize: query.pageSize }, query.sort);
@@ -104,6 +105,7 @@ export default class TaskController {
         const filterParams: Partial<TypeTaskFilterDto> = {
             id: query.id,
             createdAt: query.createdAt,
+            title: query.title,
             endDate: query.endDate,
             isComplete: query.isComplete,
             isDraft: query.isDraft

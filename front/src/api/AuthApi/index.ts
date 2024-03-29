@@ -7,7 +7,8 @@ import config from "~/config";
 
 export default class AuthApi {
     static async session(signal: AbortSignal | null, cookie: Cookie) {
-        const sessionResult = await Fetch.execute<SessionResult>({
+        const myFetch = new Fetch();
+        const sessionResult = await myFetch.execute<SessionResult>({
             url: `${config.PATH_BASE_API}auth/session`,
             cookie,
             requestInit: {
@@ -20,7 +21,8 @@ export default class AuthApi {
     }
 
     static async login(signal: AbortSignal | null) {
-        const loginResult = await Fetch.execute<SessionResult>({
+        const myFetch = new Fetch();
+        const loginResult = await myFetch.execute<SessionResult>({
             url: `${config.PATH_BASE_API}auth/login`,
             cookie: null,
             requestInit: {
@@ -39,7 +41,8 @@ export default class AuthApi {
     }
 
     static async validatePassword(password: string, signal: AbortSignal | null, cookie: Cookie) {
-        const passwordResult = await Fetch.execute<ValidatePasswordResult>({
+        const myFetch = new Fetch();
+        const passwordResult = await myFetch.execute<ValidatePasswordResult>({
             url: `${config.PATH_BASE_API}auth/validate-password`,
             cookie: null,
             requestInit: {

@@ -1,11 +1,18 @@
-import { PropFunction } from "@builder.io/qwik";
-
-import { NoteProperties } from "~/api/NoteApi/types";
+import { QRL } from "@builder.io/qwik";
 
 export type Props = {
-    id?: string,
-    action?: string,
-    onSuccessForm?: PropFunction<() => void>
+    id?: string;
+    action?: string;
+    onSuccessForm$?: QRL<() => void>
 }
 
-export type NoteFormFields = Omit<NoteProperties, "createdAt" | "deletedAt" | "id">;
+export type CreateNoteResult = {
+    id: string;
+    title: string;
+    description: string;
+    isDraft: boolean;
+    createdAt: Date;
+    deletedAt: null;
+}
+
+export type NoteFormFields = Omit<CreateNoteResult, "createdAt" | "deletedAt" | "id">;

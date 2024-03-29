@@ -14,8 +14,8 @@ export interface FromDataToResponse {
 }
 
 export default class TaskModelDto {
-    static fromDomainToData(note: Task): TaskProperties {
-        const properties = note.properties();
+    static fromDomainToData(task: Task): TaskProperties {
+        const properties = task.properties();
 
         const taskEntity: TaskEntity = {
             id: properties.id,

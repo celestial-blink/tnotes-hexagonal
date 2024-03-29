@@ -15,7 +15,7 @@ export default component$<Props>(({ id, title, isComplete, createdAt, endDate, o
     });
 
     const handleClickMenuItem$ = $((event: PointerEvent, element: HTMLMenuElement) => {
-        const { dataset } = element;
+        const { dataset } = event.target as HTMLButtonElement;
         if (evRefClose.includes(dataset?.action ?? "")) handleCloseDetails$();
 
         showConfirmDelete.value = dataset?.action === "confirm-delete";
@@ -33,7 +33,7 @@ export default component$<Props>(({ id, title, isComplete, createdAt, endDate, o
     });
 
     return (
-        <div class="flex flex-wrap justify-between border rounded p-2 items-center bg-slate-100 dark:bg-slate-600 dark:text-white dark:border-none">
+        <div class="flex flex-wrap justify-between border rounded p-2 items-center bg-slate-100 dark:bg-slate-600 dark:text-white dark:border-none gap-2">
             <div class="flex gap-1 flex-1 h-full items-center justify-between">
                 <div class="flex gap-1 flex-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-notes" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 3m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z" /><path d="M9 7l6 0" /><path d="M9 11l6 0" /><path d="M9 15l4 0" /></svg>
@@ -55,7 +55,7 @@ export default component$<Props>(({ id, title, isComplete, createdAt, endDate, o
                     </li>
                     <li> <menu class={`w-full ${showConfirmDelete.value ? "bg-red-500 text-white flex justify-evenly" : "hover:bg-slate-200"}`}>
                         {
-                            showConfirmDelete
+                            showConfirmDelete.value
                                 ?
                                 <>
                                     <li>

@@ -1,4 +1,5 @@
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import express, { Application } from "express";
 import helmet from "helmet";
 import userRouter from "./modules/user/presentation/user.router";
@@ -17,6 +18,7 @@ export default class App {
     }
 
     mountMiddlewares(): void {
+        this.app.use(cookieParser())
         this.app.use(cors());
         this.app.use(helmet());
         this.app.use(express.json());

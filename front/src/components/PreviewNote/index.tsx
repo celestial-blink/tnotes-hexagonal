@@ -20,10 +20,10 @@ export default component$<Props>(({ id }) => {
     });
 
     return (
-        note
-            ? <div className="w-full gap-2 flex flex-col text-lg min-w-[330px]">
-                <h2 className="font-bold">{note.value?.title}</h2>
-                <p className="text-base">{note.value?.description}</p>
+        note.value
+            ? <div class="w-full gap-2 flex flex-col text-lg min-w-[330px]">
+                <h2 class="font-bold">{note.value?.title}</h2>
+                <p class="text-base">{note.value?.description}</p>
             </div>
             : <p>Cargando...</p>
     );

@@ -1,7 +1,7 @@
-import { useStore } from "@builder.io/qwik";
+import { useStore, $ } from "@builder.io/qwik";
 import { server$ } from "@builder.io/qwik-city";
 
-import { NoteFilters } from "~/api/NoteApi/types";
+import { NoteFilterParams, NoteFilterResult } from "~/api/NoteApi/types";
 import NoteApi from "~/api/NoteApi";
 
 export type TypeDataResult = {
@@ -24,14 +24,18 @@ export type TypeNoteResult = {
 
 
 export type TypeNoteFilters = {
-    includeDraft: boolean, onlyDraft: boolean, title: string, page: number, sort: "asc" | "desc"
+    includeDraft: boolean;
+    onlyDraft: boolean;
+    title: string;
+    page: number;
+    sort: "asc" | "desc";
 };
 
-const prepareQuery = (payload: TypeNoteFilters): Partial<NoteFilters> => {
+const prepareFilter = (payload: TypeNoteFilters): Partial<NoteFilterParams> => {
     const { title, includeDraft, onlyDraft, ...rest } = payload;
 
-    const preparePayload: Partial<NoteFilters> = { page: rest.page, sort: rest.sort };
-    if (title?.trim()) preparePayload.title = title.trim();
+    const preparePayload: Partial<NoteFilterParams> = { page: rest.page, sort: rest.sort };
+    if (title?.trim()) preparePayload.title = title;
     if (!(includeDraft || onlyDraft)) preparePayload.isDraft = false;
     if (onlyDraft) preparePayload.isDraft = true;
 
@@ -39,26 +43,26 @@ const prepareQuery = (payload: TypeNoteFilters): Partial<NoteFilters> => {
     return preparePayload;
 }
 
-export const filterNote = server$(async function (data) {
+export const filterNote = server$(async function (data: TypeNoteFilters) {
     const localFilters: TypeNoteFilters = {
         includeDraft: !!data.includeDraft,
         onlyDraft: !!data.onlyDraft,
-        page: 1,
-        sort: "desc",
+        page: data.page,
+        sort: data.sort,
         title: data.title
     }
-    const filters = prepareQuery(localFilters);
+    const filters = prepareFilter(localFilters);
 
-    const notes = await NoteApi.filter<{ total: TypeDataTotal, result: TypeDataResult[] }>(filters, this.signal, this.cookie);
+    const notes = await NoteApi.filter(filters, this.signal, this.cookie);
 
     return notes;
 });
 
 
-const useNote = () => {
-    const notes = useStore<TypeNoteResult>({
-        data: null,
-        total: null
+const useNote = (initialValues: NoteFilterResult = { entities: [], total: 1 }) => {
+    const notes = useStore({
+        data: initialValues.entities,
+        total: initialValues.total
     });
 
     const noteFilters = useStore<TypeNoteFilters>({
@@ -69,16 +73,16 @@ const useNote = () => {
         title: ""
     });
 
-    const onFetchData = async () => {
+    const onFetchData$ = $(async () => {
         const fetchData = await filterNote(noteFilters);
         if (fetchData.success) {
-            notes.data = fetchData.data.result;
+            notes.data = fetchData.data.entities;
             notes.total = fetchData.data.total;
         }
-    }
+    })
 
     return ({
-        notes, noteFilters, onFetchData
+        notes, noteFilters, onFetchData$
     })
 };
 

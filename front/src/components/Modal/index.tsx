@@ -12,9 +12,9 @@ export default component$(() => {
         modalContext.show = !modalContext.show;
     });
 
-    const handleOnClose = $((_: PointerEvent, element: HTMLDivElement) => {
-        const { dataset } = element;
-        if (dataset.evref === "handleOnClose") handleClickToggleModal();
+    const handleOnClose = $((event: PointerEvent, element: HTMLDivElement) => {
+        const { dataset } = event.target as HTMLDivElement;
+        if (dataset?.evref === "handleOnClose") handleClickToggleModal();
     });
 
     useOnDocument("DOMContentLoaded", $(() => {

@@ -68,9 +68,10 @@ const useTask = (initialValues: TaskFilterResult = { entities: [], total: 1 }) =
 
     const onFetchData$ = $(async () => {
         const fetchData = await filterTask(taskFilters);
+
         if (fetchData.success) {
             tasks.data = fetchData.data.entities;
-            tasks.total = fetchData.data.total
+            tasks.total = fetchData.data.total;
         }
     })
 

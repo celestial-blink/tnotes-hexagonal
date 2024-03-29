@@ -1,28 +1,27 @@
 import { component$, useSignal, $ } from "@builder.io/qwik";
 
-
 import { Props } from "./types";
 
 const evRefClose = ["update", "delete"];
+
 export default component$<Props>(({ id, title, createdAt, isDraft, onClickItem$, onClickMenu$ }) => {
 
     const showConfirmDelete = useSignal<boolean>(false);
     const refDetails = useSignal<HTMLDetailsElement>();
 
-    const handleCloseDetails = () => {
+    const handleCloseDetails = $(() => {
         if (refDetails.value) refDetails.value.open = false;
-    }
+    })
 
     const handleClickMenuItem = $((event: PointerEvent, element: HTMLMenuElement) => {
-        const { dataset } = element;
+        const { dataset } = event.target as HTMLButtonElement;
         if (evRefClose.includes(dataset?.action ?? "")) handleCloseDetails();
 
         showConfirmDelete.value = dataset?.action === "confirm-delete";
-
         onClickMenu$?.(
             dataset?.action ?? "",
             id,
-            isDraft.toString()
+            (!isDraft).toString()
         );
     });
 
@@ -54,9 +53,9 @@ export default component$<Props>(({ id, title, createdAt, isDraft, onClickItem$,
                         </button>
                     </li>
                     <li>
-                        <menu class={`w-full ${showConfirmDelete ? "bg-red-500 text-white flex justify-evenly" : "hover:bg-slate-200"}`}>
+                        <menu class={`w-full ${showConfirmDelete.value ? "bg-red-500 text-white flex justify-evenly" : "hover:bg-slate-200"}`}>
                             {
-                                showConfirmDelete
+                                showConfirmDelete.value
                                     ?
                                     <>
                                         <li>
@@ -76,7 +75,7 @@ export default component$<Props>(({ id, title, createdAt, isDraft, onClickItem$,
                                     </li>
                             }
                         </menu> </li>
-                    <li> <button data-action="asDraft" class="p-1 w-full cursor-pointer hover:bg-slate-200 text-right disabled:opacity-60 disabled:bg-slate-200 disabled:cursor-not-allowed dark:hover:bg-slate-500"> {isDraft ? "Quitar de" : "Agregar a"} borradores</button> </li>
+                    <li> <button data-action="asDraft" value={"true"} class="p-1 w-full cursor-pointer hover:bg-slate-200 text-right disabled:opacity-60 disabled:bg-slate-200 disabled:cursor-not-allowed dark:hover:bg-slate-500"> {isDraft ? "Quitar de" : "Agregar a"} borradores</button> </li>
                 </menu>
             </details>
         </div>

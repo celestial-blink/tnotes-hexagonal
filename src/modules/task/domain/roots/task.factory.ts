@@ -15,9 +15,7 @@ export default class TaskFactory {
             id: properties.id ?? id.toString(),
             createdAt: properties.createdAt ?? new Date(),
             updatedAt: properties.updatedAt ?? null,
-            deletedAt: properties.deletedAt ?? null,
-            isDraft: false,
-            isComplete: false
+            deletedAt: properties.deletedAt ?? null
         }
 
         let error: ErrorInterface;

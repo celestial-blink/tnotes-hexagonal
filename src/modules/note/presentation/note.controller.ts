@@ -5,7 +5,7 @@ import type { NoteProperties } from "../domain/roots/types";
 import NoteFactory from "../domain/roots/note.factory";
 import ResponseApi from "../../../core/helpers/response-api";
 import type { UserProperties } from "../../user/domain/roots/types";
-import { TypeNoteFilterDto } from "./dtos/request/task-filter.dto";
+import { TypeNoteFilterDto } from "./dtos/request/note-filter.dto";
 import { FilterNoteDto } from "../application/dtos/response/filter.dto";
 
 export default class NoteController {
@@ -85,7 +85,31 @@ export default class NoteController {
             title: query.title
         }
 
-        const getFilterResult = await this.application.filter(userId, filterParams, { page: query.page, pageSize: query.pageSize });
+        const getFilterResult = await this.application.filter(userId, filterParams, { page: query.page, pageSize: query.pageSize }, query.sort);
+
+        if (getFilterResult.isErr()) return next(getFilterResult.error);
+
+        return res
+            .status(200)
+            .json(
+                ResponseApi.success(getFilterResult.value)
+            );
+    }
+
+    async getOnlyFilter(req: Request, res: Response, next: NextFunction) {
+        const { user } = res.locals;
+        const { id: userId } = user as UserProperties;
+
+        const query = res.locals.query as TypeNoteFilterDto;
+
+        const filterParams: Partial<TypeNoteFilterDto> = {
+            id: query.id,
+            createdAt: query.createdAt,
+            isDraft: query.isDraft,
+            title: query.title
+        };
+
+        const getFilterResult = await this.application.onlyFilter(userId, filterParams, { page: query.page, pageSize: query.pageSize }, query.sort);
 
         if (getFilterResult.isErr()) return next(getFilterResult.error);
 

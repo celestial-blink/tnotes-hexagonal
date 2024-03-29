@@ -11,7 +11,7 @@ export default component$(({ current, value, handlePagination }: Props) => {
     const handleClick$ = $((event: PointerEvent, element: HTMLAnchorElement) => {
         event.preventDefault();
         if (current) return;
-        handlePagination?.(value - 1);
+        handlePagination?.(value);
     })
 
     return (

@@ -7,7 +7,9 @@ import { NoteProperties, NoteFilterParams, NoteCreateParams, NoteFilterResult, N
 
 export default class NoteApi {
     static async create(note: NoteCreateParams, signal: AbortSignal | null, cookie: Cookie) {
-        const createdResult = await Fetch.execute<NoteProperties>({
+        const myFetch = new Fetch();
+
+        const createdResult = await myFetch.execute<NoteProperties>({
             url: `${config.PATH_BASE_API}note/insert`,
             cookie,
             requestInit: {
@@ -21,7 +23,8 @@ export default class NoteApi {
     }
 
     static async update(id: string, note: Partial<NoteUpdateParams>, signal: AbortSignal | null, cookie: Cookie) {
-        const updatedResult = await Fetch.execute<NoteProperties>({
+        const myFetch = new Fetch();
+        const updatedResult = await myFetch.execute<NoteProperties>({
             url: `${config.PATH_BASE_API}note/update/${id}`,
             cookie,
             requestInit: {
@@ -35,7 +38,8 @@ export default class NoteApi {
     }
 
     static async remove(id: string, signal: AbortSignal | null, cookie: Cookie) {
-        const updatedResult = await Fetch.execute<NoteProperties>({
+        const myFetch = new Fetch();
+        const updatedResult = await myFetch.execute<NoteProperties>({
             url: `${config.PATH_BASE_API}note/remove/${id}`,
             cookie,
             requestInit: {
@@ -54,7 +58,8 @@ export default class NoteApi {
             queryString.append(key, value.toString());
         });
 
-        const filterResult = await Fetch.execute<NoteFilterResult>({
+        const myFetch = new Fetch();
+        const filterResult = await myFetch.execute<NoteFilterResult>({
             url: `${config.PATH_BASE_API}note/filter?${queryString.toString()}`,
             cookie,
             requestInit: {
@@ -73,7 +78,8 @@ export default class NoteApi {
             queryString.append(key, value.toString());
         });
 
-        const filterResult = await Fetch.execute<NoteFilterResult>({
+        const myFetch = new Fetch();
+        const filterResult = await myFetch.execute<NoteFilterResult>({
             url: `${config.PATH_BASE_API}note/only-filter?${queryString.toString()}`,
             cookie,
             requestInit: {
@@ -86,7 +92,9 @@ export default class NoteApi {
     }
 
     static async getById(id: string, signal: AbortSignal, cookie: Cookie) {
-        const findTask = await Fetch.execute<NoteProperties>({
+        const myFetch = new Fetch();
+
+        const findTask = await myFetch.execute<NoteProperties>({
             url: `${config.PATH_BASE_API}note/id/${id}`,
             cookie,
             requestInit: {
@@ -99,7 +107,9 @@ export default class NoteApi {
     }
 
     static async lastNotes(signal: AbortSignal, cookie: Cookie) {
-        const findTask = await Fetch.execute<NoteLastNotesResult>({
+        const myFetch = new Fetch();
+
+        const findTask = await myFetch.execute<NoteLastNotesResult>({
             url: `${config.PATH_BASE_API}note/last-notes`,
             cookie,
             requestInit: {

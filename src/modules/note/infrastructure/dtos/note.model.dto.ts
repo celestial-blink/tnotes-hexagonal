@@ -20,7 +20,7 @@ export default class NoteModelDto {
             userId: properties.userId,
             title: properties.title,
             description: properties.description,
-            createdAt: properties.deletedAt,
+            createdAt: properties.createdAt,
             isDraft: properties.isDraft,
             updatedAt: properties.updatedAt,
             deletedAt: properties.deletedAt

@@ -11,11 +11,11 @@ import TaskItem from "~/components/TaskItem";
 import { SkeletonTaskItem } from "~/components/TaskItem/Skeleton";
 import PreviewTask from "~/components/PreviewTask";
 
-import { filterTask, deleteTask, getCoincidences, updateTask } from "./servers";
+import { deleteTask, getCoincidences, updateTask } from "./servers";
 import useTask from "~/hooks/useTask";
 import { ModalContext } from "~/context/ModalContext";
 
-import { useLoaderTask } from "../layout";
+import { useLoaderTask } from "./layout";
 
 export default component$(() => {
     const loaderTask = useLoaderTask();
@@ -28,9 +28,9 @@ export default component$(() => {
     const modalContext = useContext(ModalContext);
 
     const onSuccessForm = $(() => {
-        onFetchData$();
         modalContext.component = null;
         modalContext.show = false;
+        onFetchData$();
     });
 
     const handleAdd = $((id?: string, action?: string) => {
@@ -59,23 +59,30 @@ export default component$(() => {
         return fetchData.data;
     });
 
-    const onSubmitSearch$ = $(async (title: string) => {
+    const onSubmitSearch$ = $((title: string) => {
         taskFilters.title = title;
+
+        onFetchData$();
     });
 
     const handlePagination = $((page: number = 0) => {
         taskFilters.page = page;
+        onFetchData$();
     });
 
     const handleClickFilter = $((event: PointerEvent, _: HTMLDetailsElement) => {
         const { dataset, tagName, value } = event.target as HTMLButtonElement;
-        if (tagName === "BUTTON" && dataset?.evref === "handleClickFilter" && dataset.action && Object.hasOwn(filterTask, dataset?.action)) {
+
+        if (tagName === "BUTTON" && dataset?.evref === "handleClickFilter" && dataset.action && Object.hasOwn(taskFilters, dataset?.action)) {
+
             if (dataset.action === "sort") taskFilters.sort = value === "asc" ? "asc" : "desc";
             if (dataset.action === "includeDraft") taskFilters.includeDraft = !taskFilters.includeDraft;
-            if (dataset.action === "onlyDraft") taskFilters.includeDraft = !taskFilters.onlyDraft;
+            if (dataset.action === "onlyDraft") taskFilters.onlyDraft = !taskFilters.onlyDraft;
             if (dataset.action === "includeComplete") taskFilters.includeComplete = !taskFilters.includeComplete;
             if (dataset.action === "onlyComplete") taskFilters.onlyComplete = !taskFilters.onlyComplete;
             if (dataset.action === "onlyPending") taskFilters.onlyPending = !taskFilters.onlyPending;
+
+            onFetchData$();
         }
     });
 
@@ -101,7 +108,7 @@ export default component$(() => {
                         </summary>
                         <menu class="as-menu absolute bg-white p-2 right-[15px] rounded w-max flex gap-2 flex-col text-sm dark:bg-slate-800">
                             <li>
-                                <button class={`w-full text-left p-[2px] rounded ${taskFilters.sort === "desc" ? "bg-slate-200 dark:bg-slate-500" : ""}`} data-action="sort" data-evref="handleClickFilter" value={"asc"}>
+                                <button class={`w-full text-left p-[2px] rounded ${taskFilters.sort === "asc" ? "bg-slate-200 dark:bg-slate-500" : ""}`} data-action="sort" data-evref="handleClickFilter" value={"asc"}>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-up inline-block align-bottom" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M18 11l-6 -6" /><path d="M6 11l6 -6" /></svg>
                                     Ordenar ascendente
                                 </button>
@@ -125,7 +132,7 @@ export default component$(() => {
                                 </button>
                             </li>
                             <li>
-                                <button class="w-full text-left disabled:opacity-60 disabled:cursor-not-allowed" disabled={taskFilters.onlyPending || taskFilters.onlyComplete} data-action="onlyDraft" data-evref="handleClickFilter">
+                                <button class="w-full text-left disabled:opacity-60 disabled:cursor-not-allowed" disabled={taskFilters.onlyPending || taskFilters.onlyComplete} data-action="onlyDraft" data-evref="handleClickFilter" value={"1"}>
                                     {
                                         taskFilters.onlyDraft
                                             ? <svg xmlns="http://www.w3.org/2000/svg" class={`inline-block align-bottom ${taskFilters.onlyPending ? "text-slate-600" : "text-green-500"}`} width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-2.626 7.293a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" stroke-width="0" fill="currentColor" /></svg>
@@ -170,13 +177,13 @@ export default component$(() => {
                     </details>
                 </section>
                 <section class="rounded bg-white p-2 dark:bg-slate-700 dark:text-white">
-                    <Pagination title="notas" total={tasks.total ?? 0} current={taskFilters.page ?? 0} handlePagination={handlePagination} />
+                    <Pagination title="Tareas" total={tasks.total ?? 0} current={taskFilters.page ?? 0} handlePagination={handlePagination} />
                     <div class="flex  flex-col gap-2 mt-2">
                         {
                             tasks !== null
                                 ? (
                                     tasks.data?.length
-                                        ? tasks.data.map(item => <TaskItem key={item.id} id={item.id} title={item.title} createdAt={format(new Date(item.createdAt), "dd MMMM yyyy")} onClickMenu$={handleClickMenuItem$} isDraft={item.isDraft} onClickItem$={handleView} endDate={item.endDate === null ? "--" : format(new Date(item.endDate), "dd MMMM yyyy")} isComplete={!!item.isComplete} />)
+                                        ? tasks.data.map(item => <TaskItem key={`${item.id}-${item.title}`} id={item.id} title={item.title} createdAt={format(new Date(item.createdAt), "dd MMMM yyyy")} onClickMenu$={handleClickMenuItem$} isDraft={item.isDraft} onClickItem$={handleView} endDate={item.endDate === null ? "--" : format(new Date(item.endDate), "dd MMMM yyyy")} isComplete={!!item.isComplete} />)
                                         : <p>Sin resultados</p>
                                 )
                                 : <>

@@ -16,6 +16,7 @@ export default class Note {
         this.id = properties.id;
         this.userId = properties.userId;
         this.title = properties.title;
+        this.description = properties.description;
         this.isDraft = properties.isDraft;
         this.createdAt = properties.createdAt;
         this.updatedAt = properties.updatedAt;
@@ -41,10 +42,10 @@ export default class Note {
 
     update(fields: Partial<NoteProperties>) {
         const fieldsFiltered = Object.fromEntries(
-            Object.entries(fields).filter(([_, v]) => v !== null)
+            Object.entries(fields).filter(([_, v]) => v !== null && v !== undefined)
         );
-        Object.assign(this, fieldsFiltered);
         this.updatedAt = new Date();
+        Object.assign(this, fieldsFiltered);
     }
 
     static reconstitute(properties: NoteProperties): Note {

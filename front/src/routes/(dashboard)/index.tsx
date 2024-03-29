@@ -1,11 +1,34 @@
 import { component$ } from "@builder.io/qwik";
-import { Link } from "@builder.io/qwik-city";
+import { Link, routeLoader$ } from "@builder.io/qwik-city";
 
 import { useSession } from "./layout";
 
 import TitleMobile from "~/components/TitleMobile";
 import ItemLastNote, { SkeletonItemLastNote } from "~/components/ItemLastNote";
-import { useLastNotes, useCountPendingTask } from "./layout";
+import TaskApi from "~/api/TaskApi";
+import NoteApi from "~/api/NoteApi";
+
+export const useCountPendingTask = routeLoader$(async ({ cookie, signal }) => {
+    const countPending = await TaskApi.countPending(signal, cookie);
+
+    let percentTotal: number = 0;
+
+    if (countPending?.success && countPending.data.total > 0) {
+        percentTotal = Math.round((countPending.data.totalComplete * 100) / countPending.data.total);
+    }
+
+    return {
+        ...countPending,
+        percentTotal
+    }
+});
+
+export const useLastNotes = routeLoader$(async ({ cookie, signal }) => {
+    const lastNotes = await NoteApi.lastNotes(signal, cookie);
+
+    return lastNotes;
+});
+
 
 export default component$(() => {
     const session = useSession();

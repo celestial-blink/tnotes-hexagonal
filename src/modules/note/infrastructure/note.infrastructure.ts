@@ -17,8 +17,13 @@ export type LastNotesResult = Result<LastNotesFromDataToResponse[], DataBaseExce
 
 export type NoteDomainResult = Result<Note, DataBaseException>;
 
-export type TaskFilterResult = Result<
-    [entities: FilterNoteDto[], total: number],
+export type NoteFilterResult = Result<
+    { entities: FilterNoteDto[], total: number },
+    DataBaseException
+    >;
+
+export type NoteOnlyFilterResult = Result<
+    FilterNoteDto[],
     DataBaseException
 >;
 
@@ -34,15 +39,24 @@ export default class NoteInfrastructure implements NoteRepository {
     async save(note: Note): Promise<NoteResult> {
         try {
             const noteEntity = NoteModelDto.fromDomainToData(note);
-            const { id } = note.properties();
+            const { id, userId, ...rest } = noteEntity;
+
             const result = await this.prisma.note.upsert({
+                where: { id },
                 create: {
-                    ...noteEntity,
+                    ...rest,
+                    user: {
+                        connect: {
+                            id: userId
+                        }
+                    }
                 },
                 update: {
-                    ...noteEntity,
+                    ...rest,
                 },
-                where: { id },
+                include: {
+                    user: true
+                }
             });
 
             return ok(NoteModelDto.fromDataToResponse(result));
@@ -82,19 +96,21 @@ export default class NoteInfrastructure implements NoteRepository {
         }
     }
 
-    async getFilter(userId: string, filters: Partial<FilterNoteDto>, pagination: TypePagination): Promise<TaskFilterResult> {
+    async getFilter(userId: string, filters: Partial<FilterNoteDto>, pagination: TypePagination, sort: "asc" | "desc"): Promise<NoteFilterResult> {
         try {
-            const countTask = await this.prisma.task.count({
+            const countTask = await this.prisma.note.count({
                 where: {
                     userId,
                     ...filters
                 }
             });
 
-            const notes = await this.prisma.task.findMany({
-                select: { id: true, title: true, createdAt: true, isDraft: true, endDate: true, isComplete: true },
+            const notes = await this.prisma.note.findMany({
+                select: { id: true, title: true, createdAt: true, isDraft: true },
+                orderBy: { createdAt: sort },
                 where: {
                     userId,
+                    deletedAt: null,
                     ...filters
                 },
                 skip: (pagination.page - 1) * pagination.pageSize,
@@ -105,7 +121,31 @@ export default class NoteInfrastructure implements NoteRepository {
                 return FilterDto.fromDataToResponse(note);
             });
 
-            return ok([result, countTask]);
+            return ok({ entities: result, total: countTask });
+        } catch (error) {
+            return err(new DataBaseException(error.message));
+        }
+    }
+
+    async getOnlyFilter(userId: string, filters: Partial<FilterNoteDto>, pagination: TypePagination, sort: "asc" | "desc"): Promise<NoteOnlyFilterResult> {
+        try {
+            const notes = await this.prisma.note.findMany({
+                select: { id: true, title: true, createdAt: true, isDraft: true },
+                orderBy: { createdAt: sort },
+                where: {
+                    userId,
+                    deletedAt: null,
+                    ...filters
+                },
+                skip: (pagination.page - 1) * pagination.pageSize,
+                take: pagination.pageSize,
+            });
+
+            const result = notes.map(note => {
+                return FilterDto.fromDataToResponse(note);
+            });
+
+            return ok(result);
         } catch (error) {
             return err(new DataBaseException(error.message));
         }

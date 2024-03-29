@@ -15,9 +15,9 @@ export default class TaskUpdateDto implements ValidationInterface {
             .object({
                 title: z.string(),
                 description: z.string(),
-                isDraft: z.boolean(),
-                isComplete: z.boolean(),
-                endDate: z.date().nullable()
+                isDraft: z.coerce.boolean().default(false),
+                isComplete: z.coerce.boolean().default(false),
+                endDate: z.coerce.date().nullable().default(null)
             })
             .safeParse(payload);
     }

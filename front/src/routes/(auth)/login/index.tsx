@@ -7,13 +7,15 @@ import Fetch from "~/helpers/fetch";
 
 export const onGet: RequestHandler = async ({ cookie, redirect, signal }) => {
     const session = await AuthApi.session(signal, cookie);
+    console.log("🚀 ~ constonGet:RequestHandler= ~ session:", session)
 
     if (session.success) throw redirect(302, "/");
 }
 
 export const useLoginUser = routeAction$(
     async (data, { cookie, redirect }) => {
-        const login = await Fetch.execute({
+        const myFetch = new Fetch();
+        const login = await myFetch.execute({
             requestInit: {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

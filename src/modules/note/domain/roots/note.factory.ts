@@ -15,7 +15,8 @@ export default class NoteFactory {
             ...properties,
             id: properties.id ?? id.toString(),
             createdAt: properties.createdAt ?? new Date(),
-            isDraft: false
+            deletedAt: properties.deletedAt ?? null,
+            updatedAt: properties.updatedAt ?? null
         }
 
         let error: ErrorInterface;

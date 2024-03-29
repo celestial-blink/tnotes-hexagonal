@@ -48,7 +48,7 @@ export default class Task {
 
     update(fields: Partial<TaskProperties>) {
         const fieldsFiltered = Object.fromEntries(
-            Object.entries(fields).filter(([_, v]) => v !== null)
+            Object.entries(fields).filter(([_, v]) => v !== null && v !== undefined)
         );
         Object.assign(this, fieldsFiltered);
         this.updatedAt = new Date();

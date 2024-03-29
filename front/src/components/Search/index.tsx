@@ -32,10 +32,16 @@ export default component$<Props>(({ onCustomSubmit$, onChange$, defaultValue }) 
 
         onChange$(value.trim()).then(res => {
             if (res) coincidences.value = res;
-        })
+        });
+
+        if (value?.trim() === "") {
+            onCustomSubmit$(valueSearch.value)
+        }
     });
 
     const handleClickItem$ = $((event: PointerEvent, element: HTMLUListElement) => {
+        event.preventDefault();
+
         const { tagName, dataset } = event.target as HTMLLIElement;
         if (tagName === "LI" && dataset.evref === "handleClickItem") {
             const value = dataset?.value ?? "";
@@ -45,7 +51,7 @@ export default component$<Props>(({ onCustomSubmit$, onChange$, defaultValue }) 
     });
 
     return (
-        <form class="w-full flex relative text-base z-[1]" onSubmit$={() => onCustomSubmit$(valueSearch.value)}>
+        <form class="w-full flex relative text-base z-[1]" onSubmit$={() => onCustomSubmit$(valueSearch.value)} preventdefault:submit>
             <input type="search" class="custom__focus__input p-2 pr-7 rounded w-full outline-none bg-slate-100 dark:bg-slate-800 dark:text-white dark:border-slate-400" bind:value={valueSearch} onInput$={handleOnChange$} placeholder="Buscar..." />
             <ul class="absolute top-full hidden bg-white z-[2] w-full border shadow-xl p-2 max-h-sm overflow-auto dark:bg-slate-800 dark:border-slate-600" onClick$={handleClickItem$}>
                 <li class="px-1 cursor-pointer text-sm bg-transparent hover:bg-slate-100" data-value={valueSearch.value} data-evref="handleClickItem">Buscar: {valueSearch.value}</li>
